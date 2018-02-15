@@ -3,7 +3,7 @@ import Tone from 'tone';
 import { settings } from './sounds/tone.js';
 import './App.css';
 import DrumPad from './components/DrumPad.js';
-import DrumPads from './components/DrumPads.js';
+import DrumPadList from './components/DrumPadList.js';
 
 class App extends Component {
   componentDidMount() {
@@ -22,12 +22,12 @@ class App extends Component {
 
   render() {
     return (
-    <div className="container">
+    <div className="container pt-3">
       <div className="row">
-        <div className="col">    
-          <p className="App-intro">
+        <div className="col pb-3">    
+          <h2 className="App-intro">
               Hello Tone
-          </p>
+          </h2>
           <button onMouseOver={this.startLoop} onMouseOut={this.stopLoop} className="btn btn-success mr-2">
             Start
           </button>
@@ -38,7 +38,7 @@ class App extends Component {
       </div>   
       <div className="row">   
         <div className="col">       
-          <DrumPads samples={settings.samples} path="./audio/" kit="A" /> 
+          <DrumPadList samples={settings.samples} path="./audio/" kit="A" /> 
         </div>     
       </div>            
     </div>      

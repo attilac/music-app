@@ -1,0 +1,16 @@
+.module-drumpad-list .drumpad-list {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  margin: 0; }
+
+.module-drumpad-list .drumpad-list--item {
+  width: 100px;
+  height: 100px;
+  margin: 10px 0;
+  /* Magic! */ }
+
+.module-drumpad-list .drumpad-list--item .pad {
+  width: 100%;
+  height: 100%; }

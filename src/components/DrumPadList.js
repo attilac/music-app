@@ -2,7 +2,7 @@ import React, { Component } from 'react';
 import Tone from 'tone';
 import DrumPad from './DrumPad.js';
 
-class DrumPads extends Component {
+class DrumPadList extends Component {
   state = {  };
 
   getDrumPadList() {
@@ -33,4 +33,4 @@ class DrumPads extends Component {
   }
 }
 
-export default DrumPads;
+export default DrumPadList;
