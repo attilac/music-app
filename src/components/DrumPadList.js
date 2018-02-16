@@ -14,7 +14,7 @@ class DrumPadList extends Component {
           <DrumPad 
             kit={kit} 
             sound={item} 
-            name={`Pad ${index}`}
+            name={index}
             path={path} 
           />
         </div>

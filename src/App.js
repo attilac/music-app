@@ -5,19 +5,37 @@ import './App.css';
 import DrumPad from './components/DrumPad.js';
 import DrumPadList from './components/DrumPadList.js';
 
+import * as sequencer from './sounds/sequencer.js';
+import samples from "./sounds/samples.json";
+// const samples = { 'samples': settings.samples, 'basePath': './audio/', 'kit': 'A' };
+
 class App extends Component {
+  constructor(props) {
+    super(props);
+    this.state = {
+      currentBeat: null,
+      bpm: 70
+    };
+  }  
+
   componentDidMount() {
-    settings.testSynth.toMaster();
-    settings.loop.start();
-    console.log(settings.samples);
+    // settings.testSynth.toMaster();
+    // settings.loop.start();
+    // console.log(samples.basePath);  
+    this.loop = sequencer.create(samples, this.updateCurrentBeat);
+    this.loop.start();
   }
 
-  startLoop(e) {
+  startTransport() {
     Tone.Transport.start();
   }
 
-  stopLoop(e) {
+  stopTransport() {
     Tone.Transport.stop();
+  }
+
+  updateCurrentBeat = (beat) => {
+    this.setState({currentBeat: beat});
   }
 
   render() {
@@ -28,17 +46,17 @@ class App extends Component {
           <h2 className="App-intro">
               Hello Tone
           </h2>
-          <button onMouseOver={this.startLoop} onMouseOut={this.stopLoop} className="btn btn-success mr-2">
+          <button onClick={this.startTransport} className="btn btn-success mr-2">
             Start
           </button>
-          <button onClick={this.stopLoop} className="btn btn-success">
+          <button onClick={this.stopTransport} className="btn btn-success">
             Stop
           </button> 
         </div>  
       </div>   
       <div className="row">   
         <div className="col">       
-          <DrumPadList samples={settings.samples} path="./audio/" kit="A" /> 
+          <DrumPadList samples={samples} path={settings.basePath} kit="A"/> 
         </div>     
       </div>            
     </div>      
