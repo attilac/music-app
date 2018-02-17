@@ -6026,19 +6026,16 @@ a.text-dark:hover, a.text-dark:focus {
   .table-bordered td {
     border: 1px solid #ddd !important; } }
 
-.module-drumpad-list .drumpad-list {
+.module__drumpad-list .drumpad-list {
   display: flex;
   flex-direction: row;
   flex-wrap: wrap;
   justify-content: space-between;
   margin: 0; }
-
-.module-drumpad-list .drumpad-list--item {
-  width: 50px;
-  height: 50px;
-  margin: 10px 0;
-  /* Magic! */ }
-
-.module-drumpad-list .drumpad-list--item .pad {
-  width: 100%;
-  height: 100%; }
+  .module__drumpad-list .drumpad-list__item {
+    width: 50px;
+    height: 50px;
+    margin: 10px 0; }
+    .module__drumpad-list .drumpad-list__item .pad {
+      width: 100%;
+      height: 100%; }

@@ -18,7 +18,7 @@ class DrumPad extends Component {
       "autostart" : false,
     }).toMaster();    
     this.setState({player: player});
-    console.log(path + kit + '/' + sound.file);
+    // console.log(path + kit + '/' + sound.file);
   }
 
   onClick(e) {

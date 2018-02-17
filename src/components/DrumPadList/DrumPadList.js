@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
 import Tone from 'tone';
-import DrumPad from './DrumPad.js';
+import DrumPad from './../DrumPad/DrumPad.js';
 
 class DrumPadList extends Component {
   state = {  };
@@ -10,7 +10,7 @@ class DrumPadList extends Component {
     return samples.map((item, index) => { 
       // console.log(item);
       return (
-        <div key={`pad-${index}`} className="drumpad-list--item">
+        <div key={`pad-${index}`} className="drumpad-list__item">
           <DrumPad 
             kit={kit} 
             sound={item} 
@@ -24,7 +24,7 @@ class DrumPadList extends Component {
  
   render() {
     return (
-      <div className="module-drumpad-list">
+      <div className="module module__drumpad-list">
         <div className="drumpad-list"> 
           { this.getDrumPadList() } 
         </div>  
