@@ -1,4 +1,5 @@
 import React, { Component } from 'react';
+import PropTypes from 'prop-types';
 import Tone from 'tone';
 import DrumPad from './../DrumPad/DrumPad';
 
@@ -9,17 +10,20 @@ class DrumPadList extends Component {
   }
 
   getDrumPadList() {
-    const { samples, kit, path } = this.props;
+    const { currentBeat, samples, players, playing, record } = this.props;
+    // console.log(samples);
     return samples.map((item, index) =>
       (
-        <div key={`pad-${item}`} className="drumpad-list__item">
-          <DrumPad
-            kit={kit}
-            sound={item}
-            name={index}
-            path={path}
-          />
-        </div>
+        <DrumPad
+          playing={playing}
+          record={record}
+          key={`${item.path}`}
+          sound={item.path}
+          name={item.key}
+          players={players}
+          vol={item.vol}
+          currentBeat={currentBeat}
+        />
       ));
   }
 
@@ -33,5 +37,17 @@ class DrumPadList extends Component {
     );
   }
 }
+
+DrumPadList.defaultProps = {
+  playing: false,
+  record: false,
+};
+
+DrumPadList.propTypes = {
+  samples: PropTypes.arrayOf(PropTypes.object).isRequired,
+  playing: PropTypes.bool,
+  players: PropTypes.object.isRequired,
+  record: PropTypes.bool,
+};
 
 export default DrumPadList;

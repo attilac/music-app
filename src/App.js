@@ -1,5 +1,6 @@
 import React, { Component } from 'react';
 import Tone from 'tone';
+
 import './App.css';
 import DrumPad from './components/DrumPad/DrumPad';
 import DrumPadList from './components/DrumPadList/DrumPadList';
@@ -13,18 +14,23 @@ class App extends Component {
     super(props);
     this.state = {
       playing: false,
+      record: false,
       currentBeat: -1,
       bpm: 70,
+      tracks: model.defaultSequence,
     };
     this.startTransport = this.startTransport.bind(this);
     this.stopTransport = this.stopTransport.bind(this);
     this.updateCurrentBeat = this.updateCurrentBeat.bind(this);
     this.toggleTrackBeat = this.toggleTrackBeat.bind(this);
     this.sequencer = sequencer;
+    this.players = this.sequencer.createPlayers(model.defaultSequence);
   }
 
   componentDidMount() {
-    this.loop = this.sequencer.create(model.defaultSequence, this.updateCurrentBeat);
+    const { tracks } = this.state;
+    console.log(tracks);
+    this.loop = this.sequencer.create(tracks, this.updateCurrentBeat, this.players);
     this.loop.start();
     this.setTransportBPM(80);
     // this.startTransport();
@@ -42,7 +48,7 @@ class App extends Component {
 
   stopTransport() {
     Tone.Transport.stop();
-    this.setState({ currentBeat: -1, playing: false });
+    this.setState({ currentBeat: -1, playing: false, record: false });
   }
 
   updateCurrentBeat(beat) {
@@ -60,7 +66,12 @@ class App extends Component {
     this.updateTracks(model.toggleTrackBeat(tracks, id, beat));
   }
 
+  recordIt() {
+    this.setState({ record: true });
+  }
+
   render() {
+    const { currentBeat, tracks, record, playing } = this.state;
     return (
       <div className="container pt-3">
         <div className="row">
@@ -83,7 +94,13 @@ class App extends Component {
         </div>
         <div className="row">
           <div className="col">
-            <DrumPadList samples={samples} path={model.settings.basePath} kit="A" />
+            <DrumPadList 
+              players={this.players} 
+              samples={tracks} 
+              record={record} 
+              playing={playing}
+              currentBeat={currentBeat}
+            />
           </div>
         </div>
       </div>
