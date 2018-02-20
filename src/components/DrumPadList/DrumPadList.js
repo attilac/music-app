@@ -10,7 +10,7 @@ class DrumPadList extends Component {
   }
 
   getDrumPadList() {
-    const { currentBeat, samples, players, playing, record } = this.props;
+    const { currentBeat, samples, players, playing, record, toggleTrackBeat } = this.props;
     // console.log(samples);
     return samples.map((item, index) =>
       (
@@ -18,18 +18,21 @@ class DrumPadList extends Component {
           playing={playing}
           record={record}
           key={`${item.path}`}
-          sound={item.path}
-          name={item.key}
+          sample={item.path}
+          title={item.key}
+          trackId={item.id}
           players={players}
           vol={item.vol}
           currentBeat={currentBeat}
+          toggleTrackBeat={toggleTrackBeat}
+          beats={samples[index].beats}
         />
       ));
   }
 
   render() {
     return (
-      <div className="module module__drumpad-list">
+      <div className="module module-drumpad-list">
         <div className="drumpad-list">
           { this.getDrumPadList() }
         </div>
@@ -39,11 +42,13 @@ class DrumPadList extends Component {
 }
 
 DrumPadList.defaultProps = {
+  currentBeat: -1,
   playing: false,
   record: false,
 };
 
 DrumPadList.propTypes = {
+  currentBeat: PropTypes.number,
   samples: PropTypes.arrayOf(PropTypes.object).isRequired,
   playing: PropTypes.bool,
   players: PropTypes.object.isRequired,

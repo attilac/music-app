@@ -8,6 +8,7 @@ module.exports = {
         "es6": true,
     },
     "rules" : {
+        "object-curly-newline": 0,
         "react/jsx-filename-extension": [1, { "extensions": [".js", ".jsx"] }],
         "react/forbid-prop-types": 0,
         "no-console": 0,

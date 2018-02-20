@@ -11,10 +11,10 @@ export const settings = {
 export const defaultSequence = [
   {
     id: 1,
-    path: `${settings.basePath}${samples[2].kit}/${samples[2].file}`,
+    path: `${settings.basePath}${samples[17].kit}/${samples[17].file}`,
     vol: -6,
     muted: false,
-    beats: [0, 3, 8],
+    beats: [0],
     key: 'q',
   },
   {
@@ -22,7 +22,7 @@ export const defaultSequence = [
     path: `${settings.basePath}${samples[1].kit}/${samples[1].file}`,
     vol: -6,
     muted: false,
-    beats: [9],
+    beats: [10],
     key: 'w',
   },
   {
@@ -30,7 +30,7 @@ export const defaultSequence = [
     path: `${settings.basePath}${samples[3].kit}/${samples[3].file}`,
     vol: -6,
     muted: false,
-    beats: [2, 11],
+    beats: [4, 12, 7],
     key: 'e',
   },
   {
@@ -38,7 +38,7 @@ export const defaultSequence = [
     path: `${settings.basePath}${samples[25].kit}/${samples[25].file}`,
     vol: -6,
     muted: false,
-    beats: [2, 7, 11, 13],
+    beats: [2, 7, 11, 13, 10, 12, 14],
     key: 'r',
   },
   {
@@ -46,7 +46,7 @@ export const defaultSequence = [
     path: `${settings.basePath}${samples[4].kit}/${samples[4].file}`,
     vol: -6,
     muted: false,
-    beats: [],
+    beats: [15],
     key: 't',
   },
   {
@@ -57,6 +57,38 @@ export const defaultSequence = [
     beats: [],
     key: 'y',
   },
+  {
+    id: 7,
+    path: `${settings.basePath}${samples[6].kit}/${samples[6].file}`,
+    vol: -6,
+    muted: false,
+    beats: [],
+    key: 'u',
+  },
+  {
+    id: 8,
+    path: `${settings.basePath}${samples[7].kit}/${samples[7].file}`,
+    vol: -6,
+    muted: false,
+    beats: [],
+    key: 'i',
+  },
+  {
+    id: 9,
+    path: `${settings.basePath}${samples[8].kit}/${samples[8].file}`,
+    vol: -6,
+    muted: false,
+    beats: [],
+    key: 'o',
+  }, 
+  {
+    id: 10,
+    path: `${settings.basePath}${samples[9].kit}/${samples[9].file}`,
+    vol: -6,
+    muted: false,
+    beats: [],
+    key: 'p',
+  },
 ];
 
 export function toggleTrackBeat(tracks, id, beat) {
@@ -64,8 +96,21 @@ export function toggleTrackBeat(tracks, id, beat) {
     if (track.id !== id) {
       return track;
     }
-    return { ...track, beats: track.beats.map((v, i) => (i !== beat ? v : !v)) };
+    // console.log(beat);
+    return { ...track, beats: beatReplacer(track.beats, beat) };
   });
+}
+
+function beatReplacer(beats, beat) {
+  let newBeats = [...beats];
+  if (!beats.includes(beat)) {
+    newBeats = [...beats, beat];
+  }
+  return newBeats;
+}
+
+function sortNumber(a,b) {
+  return a - b;
 }
 
 function compare(a, b) {

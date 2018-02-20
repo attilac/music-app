@@ -3,10 +3,11 @@ import { settings } from './../data/model';
 
 export function createPlayers(tracks) {
   // tracks: {id: 1, name: "hihat-reso", vol: .4, muted: false, beats: initBeats(16)}
+  const limiter = new Tone.Limiter(-6).toMaster();
   const paths = tracks.reduce((acc, { path }) => ({ ...acc, [path]: path }), {});
   // console.log(paths);
   // new Tone.Players ( paths , [ onload ] )
-  const samplePlayers = new Tone.Players(paths).toMaster();
+  const samplePlayers = new Tone.Players(paths).connect(limiter);
   // console.log(samplePlayers);
   return samplePlayers;
 }
@@ -25,8 +26,8 @@ export function create(tracks, beatNotifier, samplePlayers) {
   return loop;
 }
 
-export function update(loop, tracks, beatNotifier) {
-  loop.callback = loopHandler(tracks, beatNotifier);
+export function update(loop, tracks, beatNotifier, samplePlayers) {
+  loop.callback = loopHandler(tracks, beatNotifier, samplePlayers);
   return loop;
 }
 

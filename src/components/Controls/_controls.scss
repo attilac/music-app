@@ -1,0 +1,92 @@
+.module-controls {
+  .transport-play {
+    position: relative;
+    padding-left: 32px;
+    .icon-play {
+      position: absolute;
+      top: 50%;
+      left: 10px;
+      transform: translate(0%, -50%);    
+      width: 19px;
+      height: 16px;
+      display: inline-block;
+      &:before {
+        content: '';
+        display: block;
+        border-top: 8px solid transparent;
+        border-bottom: 8px solid transparent;
+        border-left: 14px solid $body-color;    
+      }
+    } 
+
+    &:hover,
+    &.active {
+      .icon-play {
+        &:before {
+          border-left-color: $white;
+        }    
+      }
+    }   
+  }
+
+  .transport-stop {
+    position: relative;
+    padding-left: 32px;
+    .icon-stop {
+      position: absolute;
+      top: 50%;
+      left: 10px;
+      transform: translate(0%, -50%);
+      width: 14px;
+      height: 14px;
+      display: inline-block;
+      &:before {
+        content: '';
+        display: block;
+        width: 14px;
+        height: 14px;
+        background-color: $body-color;
+      }
+    }
+
+    &:hover, 
+    &.active {
+      .icon-stop {
+        &:before {
+          background-color: $white;
+        }    
+      }
+    }  
+  }
+
+  .transport-record {
+    position: relative;
+    padding-left: 32px;
+    .icon-record {
+      position: absolute;
+      top: 50%;
+      left: 10px;
+      transform: translate(0%, -50%);    
+      width: 16px;
+      height: 16px;
+      display: inline-block;
+      &:before {
+        content: '';
+        display: block;
+        width: 16px;
+        height: 16px;    
+        border-radius: 100%;
+        background-color: $body-color;
+      }
+    }
+
+    &:hover, 
+    &.active {
+      .icon-record {
+        &:before {
+          background-color: $red;
+        }    
+      }
+    }    
+  }  
+}
