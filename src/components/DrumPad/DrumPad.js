@@ -12,6 +12,7 @@ class DrumPad extends Component {
     this.onClick = this.onClick.bind(this);
     this.onKeyDown = this.onKeyDown.bind(this);
     this.onKeyUp = this.onKeyUp.bind(this);
+    this.clearTrackBeat = this.clearTrackBeat.bind(this);
   }
 
   componentDidMount() {
@@ -41,10 +42,13 @@ class DrumPad extends Component {
   }
 
   onKeyDown(keyName) {
-    const { title, sample, players, playing } = this.props;
+    const { title, sample, players, playing, erase } = this.props;
     if (keyName === title) {
       // console.log(`${sample} was pressed`);
       this.setState({ active: !this.state.active });
+      if (erase) {
+        this.clearTrackBeat();
+      }
       this.playSound();
     }
   }
@@ -56,13 +60,18 @@ class DrumPad extends Component {
     }
   }
 
+  clearTrackBeat() {
+    const { trackId, clearTrackBeat } = this.props;
+    clearTrackBeat(trackId);
+    console.log('Erasing track');
+  }
+
   playSound() {
     const { currentBeat, record, title, sample, players, playing, vol } = this.props;
+
     if (playing) {
-      // console.log(Tone.Transport.nextSubdivision('16n'));
-      // console.log(currentBeat);
-      players.get(sample).start(Tone.Transport.nextSubdivision('16n'), 0, '1n');
-      // players.get(sample).start(AudioContext.currentTime, 0, '1n');
+      // players.get(sample).start(Tone.Transport.nextSubdivision('16n'), 0, '1n');
+      players.get(sample).start(AudioContext.currentTime, 0, '1n');
       if (record) {
         this.recordIt();
       }
@@ -100,7 +109,9 @@ class DrumPad extends Component {
 }
 
 DrumPad.defaultProps = {
+  beats: [],
   currentBeat: '',
+  erase: false,
   muted: false,
   playing: false,
   record: false,
@@ -108,13 +119,18 @@ DrumPad.defaultProps = {
 };
 
 DrumPad.propTypes = {
+  beats: PropTypes.arrayOf(PropTypes.number),
+  clearTrackBeat: PropTypes.func.isRequired,
   currentBeat: PropTypes.number,
+  erase: PropTypes.bool,
   muted: PropTypes.bool,
   title: PropTypes.string.isRequired,
   sample: PropTypes.string.isRequired,
   playing: PropTypes.bool,
   players: PropTypes.object.isRequired,
   record: PropTypes.bool,
+  toggleTrackBeat: PropTypes.func.isRequired,
+  trackId: PropTypes.number.isRequired,
   vol: PropTypes.number,
 };
 

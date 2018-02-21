@@ -12,22 +12,18 @@ export function createPlayers(tracks) {
   return samplePlayers;
 }
 
-export function create(tracks, beatNotifier, samplePlayers) {
+export function create(tracks, beatNotifier, timeNotifier, samplePlayers) {
   // new Tone.Sequence ( callback , events , subdivision )
   const loop = new Tone.Sequence(
-    loopHandler(tracks, beatNotifier, samplePlayers),
+    loopHandler(tracks, beatNotifier, timeNotifier, samplePlayers),
     new Array(16).fill(0).map((_, i) => i),
     '16n',
   );
-
-  // Tone.Transport.bpm.value = 70;
-  // Tone.Transport.start();
-  // console.log(loop);
   return loop;
 }
 
-export function update(loop, tracks, beatNotifier, samplePlayers) {
-  loop.callback = loopHandler(tracks, beatNotifier, samplePlayers);
+export function update(loop, tracks, beatNotifier, timeNotifier, samplePlayers) {
+  loop.callback = loopHandler(tracks, beatNotifier, timeNotifier, samplePlayers);
   return loop;
 }
 
@@ -35,10 +31,10 @@ export function setBPM(bpm) {
   Tone.Transport.bpm.value = bpm;
 }
 
-function loopHandler(tracks, beatNotifier, samplePlayers) {
+function loopHandler(tracks, beatNotifier, timeNotifier, samplePlayers) {
   return (time, index) => {
     beatNotifier(index);
-    // console.log(index);
+    timeNotifier();
     tracks.forEach(({ path, vol, muted, beats }) => {
       if (beats.includes(index)) {
         try {

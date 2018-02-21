@@ -80,7 +80,7 @@ export const defaultSequence = [
     muted: false,
     beats: [],
     key: 'o',
-  }, 
+  },
   {
     id: 10,
     path: `${settings.basePath}${samples[9].kit}/${samples[9].file}`,
@@ -101,6 +101,15 @@ export function toggleTrackBeat(tracks, id, beat) {
   });
 }
 
+export function clearTrackBeat(tracks, id) {
+  return tracks.map((track) => {
+    if (track.id !== id) {
+      return track;
+    }
+    return { ...track, beats: [] };
+  });
+}
+
 function beatReplacer(beats, beat) {
   let newBeats = [...beats];
   if (!beats.includes(beat)) {
@@ -109,7 +118,7 @@ function beatReplacer(beats, beat) {
   return newBeats;
 }
 
-function sortNumber(a,b) {
+function sortNumber(a, b) {
   return a - b;
 }
 
