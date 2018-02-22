@@ -1,5 +1,4 @@
 import Tone from 'tone';
-import { settings } from './../data/model';
 
 export function createPlayers(tracks) {
   // tracks: {id: 1, name: "hihat-reso", vol: .4, muted: false, beats: initBeats(16)}
@@ -48,4 +47,41 @@ function loopHandler(tracks, beatNotifier, timeNotifier, samplePlayers) {
       }
     });
   };
+}
+
+export function click(inst) {
+  const loop = new Tone.Sequence(
+    clickHandler(inst),
+    ['G5', 'C5', 'C5', 'C5'],
+    '4n',
+  );
+  return loop;
+}
+
+function clickHandler(inst) {
+  return (time, note) => {
+    try {
+      // console.log('Click ', note);
+      // console.log(inst);
+      inst.triggerAttackRelease(note, '16n');
+    } catch (e) {
+      console.log(e, 'Sample buffer not loaded');
+    }
+  };
+}
+
+export function createClickSynth() {
+  const synth = new Tone.Synth({
+    oscillator: {
+      type: 'sine',
+    },
+    envelope: {
+      attack: 0,
+      decay: 0.1,
+      sustain: 0,
+      release: 0,
+    },
+  }).toMaster();
+  synth.volume.value = -6;
+  return synth;
 }

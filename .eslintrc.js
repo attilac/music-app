@@ -1,8 +1,9 @@
-module.exports = {
-    "extends" : [
-        "airbnb"
-    ],
-    "plugins": ["react"],
+module.exports = {  
+    "extends": "react-app",
+    "plugins": ["prettier"],
+    "rules": {
+        "prettier/prettier": "error"
+    },
     "env": {
         "browser": true,
         "es6": true,

@@ -1,18 +1,20 @@
 import React, { Component } from 'react';
+import PropTypes from 'prop-types';
 import Tone from 'tone';
+import PubNubReact from 'pubnub-react';
 
 import './App.css';
-import DrumPad from './components/DrumPad/DrumPad';
 import DrumPadList from './components/DrumPadList/DrumPadList';
 
-import samples from './data/samples.json';
+// import samples from './data/samples.json';
 import * as model from './data/model';
-import * as sequencer from './modules/sequencer';
+// import * as sequencer from './modules/sequencer';
 
 class App extends Component {
   constructor(props) {
     super(props);
     this.state = {
+      click: false,
       erase: false,
       playing: false,
       record: false,
@@ -20,34 +22,55 @@ class App extends Component {
       bpm: 70,
       tracks: model.defaultSequence,
     };
+    // pubnub
+    this.pubnub = new PubNubReact({
+      publishKey: 'pub-c-08a9d77b-56c3-4db2-9328-38a797ff3150',
+      subscribeKey: 'sub-c-00ca6876-17b9-11e8-bb84-266dd58d78d1',
+    });
+    this.pubnub.init(this);
+    this.publishTrack = this.publishTrack.bind(this);
+    // music app
     this.startTransport = this.startTransport.bind(this);
     this.stopTransport = this.stopTransport.bind(this);
     this.updateCurrentBeat = this.updateCurrentBeat.bind(this);
     this.timeNotifier = this.timeNotifier.bind(this);
     this.toggleTrackBeat = this.toggleTrackBeat.bind(this);
+    this.toggleClick = this.toggleClick.bind(this);
     this.clearTrackBeat = this.clearTrackBeat.bind(this);
     this.toggleEraseMode = this.toggleEraseMode.bind(this);
     this.recordIt = this.recordIt.bind(this);
-    this.sequencer = sequencer;
-    this.players = this.sequencer.createPlayers(model.defaultSequence);
+
+    // console.log(this.props);
+
+    // this.sequencer = sequencer;
+    // this.players = this.sequencer.createPlayers(model.defaultSequence);
+    // this.clickSynth = this.sequencer.createClickSynth();
+    // this.clickSeq = this.sequencer.click(this.clickSynth);
+  }
+
+  componentWillMount() {
+    this.subscribeTo();    
   }
 
   componentDidMount() {
     const { tracks } = this.state;
-    console.log(tracks);
-    this.loop = this.sequencer
-      .create(tracks, this.updateCurrentBeat, this.timeNotifier, this.players);
+    const { sequencer, players } = this.props;
+    // console.log(tracks);
+    this.loop = sequencer
+      .create(tracks, this.updateCurrentBeat, this.timeNotifier, players);
     this.loop.start();
     this.setTransportBPM(80);
     Tone.Transport.setLoopPoints(0, '1m');
     Tone.Transport.loop = true;
-    // this.startTransport();
-    // console.log(model.defaultSequence);
+  }
+
+  componentWillUnmount() {
+    this.unsubscribe();
   }
 
   setTransportBPM(newBpm) {
-    const { bpm } = this.state;
-    this.sequencer.setBPM(newBpm);
+    const { sequencer } = this.props;
+    sequencer.setBPM(newBpm);
     this.setState({ bpm: newBpm });
   }
 
@@ -59,6 +82,54 @@ class App extends Component {
   stopTransport() {
     Tone.Transport.stop();
     this.setState({ currentBeat: -1, playing: false, record: false });
+  }
+
+  subscribeTo() {
+    this.pubnub.subscribe({
+      channels: ['tracks'],
+    });
+    this.pubnub.getMessage('tracks', (msg) => {
+      console.log(msg.message);
+    });
+    this.pubnub.getStatus((st) => {
+      console.log(st);
+    });
+    this.pubnub.addListener({
+      message: (message) => {
+        console.log('got a message', message.message.data);   
+        // this.setState({ tracks: message.message.data });
+        // this.loop = this.props.sequencer
+        // .update(this.loop, message.message.data, this.updateCurrentBeat, this.timeNotifier, this.props.players);   
+        // this.setState({ tracks: message.message.data});   
+      }
+    });
+  }
+
+  unsubscribe() {
+    this.pubnub.unsubscribe({ channels: ['tracks'] });
+  }
+
+  publishTrack(type, data) {
+    this.pubnub.publish({
+      channel: 'tracks',
+      message: { type, data },
+      callback(m) { console.log(m); },
+    });
+  }
+
+  toggleClick() {
+    const { click } = this.state;
+    const { clickSeq } = this.props;
+    if (!click) {
+      // console.log('start click');
+      clickSeq.start();
+      // clickSeq.mute = false;
+    } else {
+      // console.log('stop click');
+      clickSeq.stop();
+      // clickSeq.mute = true;
+    }
+    this.setState({ click: !click });
   }
 
   toggleTrackBeat(trackId) {
@@ -86,9 +157,11 @@ class App extends Component {
   }
 
   updateTracks(newTracks) {
+    const { sequencer } = this.props;
     this.loop = sequencer
-      .update(this.loop, newTracks, this.updateCurrentBeat, this.timeNotifier, this.players);
+      .update(this.loop, newTracks, this.updateCurrentBeat, this.timeNotifier, this.props.players);
     this.setState({ tracks: newTracks });
+    this.publishTrack('riff', newTracks);    
     // console.log(newTracks);
   }
 
@@ -97,10 +170,12 @@ class App extends Component {
   }
 
   render() {
-    const { currentBeat, tracks, record, playing, erase } = this.state;
+    const { click, currentBeat, tracks, record, playing, erase } = this.state;
+    const { players } = this.props;
     const activePlayClass = playing ? 'btn-secondary active' : 'btn-outline-secondary';
     const activeRecordClass = record ? 'btn-secondary active' : 'btn-outline-secondary';
     const activeEraseClass = erase ? 'btn-secondary active' : 'btn-outline-secondary';
+    const activeClickClass = click ? 'btn-secondary active' : 'btn-outline-secondary';
     return (
       <div className="container pt-3">
         <div className="row">
@@ -133,10 +208,16 @@ class App extends Component {
                 </button>
               </div>
               <button
-                className={`btn btn-sm ${activeEraseClass}`}
+                className={`btn btn-sm mr-2 ${activeEraseClass}`}
                 onClick={this.toggleEraseMode}
               >
                 Erase Mode
+              </button>
+              <button
+                className={`btn btn-sm ${activeClickClass}`}
+                onClick={this.toggleClick}
+              >
+                Click
               </button>
             </div>
           </div>
@@ -144,7 +225,7 @@ class App extends Component {
         <div className="row justify-content-center mt-5">
           <div className="col-lg-8">
             <DrumPadList
-              players={this.players}
+              players={players}
               samples={tracks}
               record={record}
               playing={playing}
@@ -159,5 +240,14 @@ class App extends Component {
     );
   }
 }
+
+App.defaultProps = {
+};
+
+App.propTypes = {
+  players: PropTypes.object.isRequired,
+  sequencer: PropTypes.object.isRequired,
+  clickSeq: PropTypes.object.isRequired,
+};
 
 export default App;

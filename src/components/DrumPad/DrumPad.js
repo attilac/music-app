@@ -1,6 +1,5 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
-import Tone from 'tone';
 import ReactKeymaster from 'react-keymaster';
 
 class DrumPad extends Component {
@@ -35,21 +34,21 @@ class DrumPad extends Component {
   }
 
   onClick(e) {
-    const { sample, players, playing, record } = this.props;
-    const { active } = this.state;
+    const { sample } = this.props;
     console.log(`${sample} was pressed`);
     this.playSound();
   }
 
   onKeyDown(keyName) {
-    const { title, sample, players, playing, erase } = this.props;
+    const { title, erase } = this.props;
     if (keyName === title) {
       // console.log(`${sample} was pressed`);
       this.setState({ active: !this.state.active });
       if (erase) {
         this.clearTrackBeat();
+      } else {
+        this.playSound();
       }
-      this.playSound();
     }
   }
 
@@ -67,7 +66,7 @@ class DrumPad extends Component {
   }
 
   playSound() {
-    const { currentBeat, record, title, sample, players, playing, vol } = this.props;
+    const { record, sample, players, playing } = this.props;
 
     if (playing) {
       // players.get(sample).start(Tone.Transport.nextSubdivision('16n'), 0, '1n');

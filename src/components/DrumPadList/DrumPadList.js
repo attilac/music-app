@@ -1,6 +1,5 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
-import Tone from 'tone';
 import DrumPad from './../DrumPad/DrumPad';
 
 class DrumPadList extends Component {

@@ -1,4 +1,3 @@
-import Tone from 'tone';
 import samples from './samples.json';
 
 export const settings = {
@@ -118,16 +117,3 @@ function beatReplacer(beats, beat) {
   return newBeats;
 }
 
-function sortNumber(a, b) {
-  return a - b;
-}
-
-function compare(a, b) {
-  if (a.time < b.time) {
-    return -1;
-  }
-  if (a.time > b.time) {
-    return 1;
-  }
-  return 0;
-}
