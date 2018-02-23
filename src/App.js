@@ -6,9 +6,8 @@ import PubNubReact from 'pubnub-react';
 import './App.css';
 import DrumPadList from './components/DrumPadList/DrumPadList';
 
-// import samples from './data/samples.json';
 import * as model from './data/model';
-// import * as sequencer from './modules/sequencer';
+import * as users from './data/users';
 
 class App extends Component {
   constructor(props) {
@@ -19,16 +18,21 @@ class App extends Component {
       playing: false,
       record: false,
       currentBeat: -1,
-      bpm: 70,
+      bpm: 80,
       tracks: model.defaultSequence,
+      users: [],
+      userId: users.makeUserName(),
     };
     // pubnub
     this.pubnub = new PubNubReact({
       publishKey: 'pub-c-08a9d77b-56c3-4db2-9328-38a797ff3150',
       subscribeKey: 'sub-c-00ca6876-17b9-11e8-bb84-266dd58d78d1',
+      uuid: this.state.userID,
+      presenceTimeout: 130,
     });
     this.pubnub.init(this);
     this.publishTrack = this.publishTrack.bind(this);
+    this.getUsers = this.getUsers.bind(this);
     // music app
     this.startTransport = this.startTransport.bind(this);
     this.stopTransport = this.stopTransport.bind(this);
@@ -38,14 +42,10 @@ class App extends Component {
     this.toggleClick = this.toggleClick.bind(this);
     this.clearTrackBeat = this.clearTrackBeat.bind(this);
     this.toggleEraseMode = this.toggleEraseMode.bind(this);
-    this.recordIt = this.recordIt.bind(this);
-
+    this.toogleRecord = this.toogleRecord.bind(this);
+    this.loop = this.props.sequencer
+      .create(this.state.tracks, this.updateCurrentBeat, this.timeNotifier, this.props.players);    
     // console.log(this.props);
-
-    // this.sequencer = sequencer;
-    // this.players = this.sequencer.createPlayers(model.defaultSequence);
-    // this.clickSynth = this.sequencer.createClickSynth();
-    // this.clickSeq = this.sequencer.click(this.clickSynth);
   }
 
   componentWillMount() {
@@ -53,15 +53,12 @@ class App extends Component {
   }
 
   componentDidMount() {
-    const { tracks } = this.state;
-    const { sequencer, players } = this.props;
-    // console.log(tracks);
-    this.loop = sequencer
-      .create(tracks, this.updateCurrentBeat, this.timeNotifier, players);
+    const { bpm, userId } = this.state;
     this.loop.start();
-    this.setTransportBPM(80);
+    this.setTransportBPM(bpm);
     Tone.Transport.setLoopPoints(0, '1m');
     Tone.Transport.loop = true;
+    console.log(userId);
   }
 
   componentWillUnmount() {
@@ -87,6 +84,7 @@ class App extends Component {
   subscribeTo() {
     this.pubnub.subscribe({
       channels: ['tracks'],
+      withPresence: true,
     });
     this.pubnub.getMessage('tracks', (msg) => {
       console.log(msg.message);
@@ -94,27 +92,60 @@ class App extends Component {
     this.pubnub.getStatus((st) => {
       console.log(st);
     });
+    this.pubnub.getPresence('tracks', (presence) => {
+      console.log(presence);
+    });
     this.pubnub.addListener({
-      message: (message) => {
-        console.log('got a message', message.message.data);   
-        // this.setState({ tracks: message.message.data });
-        // this.loop = this.props.sequencer
-        // .update(this.loop, message.message.data, this.updateCurrentBeat, this.timeNotifier, this.props.players);   
-        // this.setState({ tracks: message.message.data});   
-      }
+      message: (msg) => {
+        const { message } = msg;
+        console.log('got a message', message.data);  
+        // console.log('from user ', message.userId);
+        // update if track is from different user
+        if (message.userId !== this.state.userId) {
+          console.log('Updating track from user ', message.userId);      
+          this.loop = this.props.sequencer
+            .update(this.loop, message.data, this.updateCurrentBeat, this.timeNotifier, this.props.players);   
+          this.setState({ tracks: message.data}); 
+        }
+      },
+      presence: (p) => {
+        console.log(p);
+        let users = [this.state.users];
+        if (p.action === 'join') {
+          if (users.includes(p.uuid)) {
+            users = [ ...users, p.uuid ];
+            this.setState({ users: users });
+          }
+        } else if (p.action === 'leave' || p.action === 'timeout') {
+          let userId = users.indexOf(p.uuid);
+          if (userId !== -1) {
+            users = [ ...users ];
+            users.splice(userId, 1);
+            this.setState({ users: users });
+          }
+        }
+        this.getUsers();
+      }         
     });
   }
 
   unsubscribe() {
     this.pubnub.unsubscribe({ channels: ['tracks'] });
+    this.pubnub.removeListener('message');
   }
 
   publishTrack(type, data) {
+    const { userId } = this.state;
     this.pubnub.publish({
       channel: 'tracks',
-      message: { type, data },
-      callback(m) { console.log(m); },
+      message: { type, data, userId },
+      callback(msg) { console.log(msg); },
     });
+  }
+
+  getUsers() {
+    const { users } = this.state;
+    console.log(users);
   }
 
   toggleClick() {
@@ -123,11 +154,9 @@ class App extends Component {
     if (!click) {
       // console.log('start click');
       clickSeq.start();
-      // clickSeq.mute = false;
     } else {
       // console.log('stop click');
       clickSeq.stop();
-      // clickSeq.mute = true;
     }
     this.setState({ click: !click });
   }
@@ -152,8 +181,8 @@ class App extends Component {
   }
 
   timeNotifier() {
-    const barsBeats = Tone.TransportTime().toBarsBeatsSixteenths();
-    console.log(barsBeats);
+    // const barsBeats = Tone.TransportTime().toBarsBeatsSixteenths();
+    // console.log(barsBeats);
   }
 
   updateTracks(newTracks) {
@@ -165,8 +194,9 @@ class App extends Component {
     // console.log(newTracks);
   }
 
-  recordIt() {
-    this.setState({ record: true });
+  toogleRecord() {
+    const { record } = this.state;
+    this.setState({ record: !record });
   }
 
   render() {
@@ -193,7 +223,7 @@ class App extends Component {
                   Play
                 </button>
                 <button
-                  onClick={this.recordIt}
+                  onClick={this.toogleRecord}
                   className={`btn mr-2 transport-record ${activeRecordClass}`}
                 >
                   <i className="icon-record" />
