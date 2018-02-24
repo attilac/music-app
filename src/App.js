@@ -7,7 +7,6 @@ import './App.css';
 import DrumPadList from './components/DrumPadList/DrumPadList';
 
 import * as model from './data/model';
-import * as users from './data/users';
 
 class App extends Component {
   constructor(props) {
@@ -20,19 +19,23 @@ class App extends Component {
       currentBeat: -1,
       bpm: 80,
       tracks: model.defaultSequence,
-      users: [],
-      userId: users.makeUserName(),
+      users: [this.props.user],
+      userId: this.props.user,
     };
     // pubnub
+    let uuid = this.state.userId;
     this.pubnub = new PubNubReact({
       publishKey: 'pub-c-08a9d77b-56c3-4db2-9328-38a797ff3150',
       subscribeKey: 'sub-c-00ca6876-17b9-11e8-bb84-266dd58d78d1',
-      uuid: this.state.userID,
+      uuid: uuid,
       presenceTimeout: 130,
     });
     this.pubnub.init(this);
     this.publishTrack = this.publishTrack.bind(this);
+    this.addListeners = this.addListeners.bind(this);
     this.getUsers = this.getUsers.bind(this);
+    this.subscribeTo = this.subscribeTo.bind(this);
+    this.unsubscribe = this.unsubscribe.bind(this);
     // music app
     this.startTransport = this.startTransport.bind(this);
     this.stopTransport = this.stopTransport.bind(this);
@@ -45,11 +48,12 @@ class App extends Component {
     this.toogleRecord = this.toogleRecord.bind(this);
     this.loop = this.props.sequencer
       .create(this.state.tracks, this.updateCurrentBeat, this.timeNotifier, this.props.players);    
-    // console.log(this.props);
   }
 
   componentWillMount() {
-    this.subscribeTo();    
+    this.pubnub.clean('tracks');
+    this.subscribeTo();   
+    this.addListeners(); 
   }
 
   componentDidMount() {
@@ -59,6 +63,7 @@ class App extends Component {
     Tone.Transport.setLoopPoints(0, '1m');
     Tone.Transport.loop = true;
     console.log(userId);
+    window.addEventListener('beforeunload', this.unsubscribe);
   }
 
   componentWillUnmount() {
@@ -84,17 +89,37 @@ class App extends Component {
   subscribeTo() {
     this.pubnub.subscribe({
       channels: ['tracks'],
-      withPresence: true,
+      // withPresence: true,
     });
     this.pubnub.getMessage('tracks', (msg) => {
-      console.log(msg.message);
+      const { message } = msg;
+      console.log(message);  
     });
     this.pubnub.getStatus((st) => {
       console.log(st);
     });
-    this.pubnub.getPresence('tracks', (presence) => {
-      console.log(presence);
+    this.pubnub.getPresence('tracks', (pres) => {
+      console.log(pres);
+    }); 
+    this.pubnub.hereNow({
+      channels: ['tracks'],
+      includeState: true,
+    }).then((response) => {
+      console.log(response);
+      const { occupants } = response.channels.tracks;
+      const users = [...this.state.users];
+      occupants.forEach(item => {
+        if (!users.includes(item.uuid)) {
+          users.push(item.uuid);
+        }
+      });
+      this.setState({ users: users });              
+    }).catch((error) => {
+      console.log(error);
     });
+  }
+
+  addListeners() {
     this.pubnub.addListener({
       message: (msg) => {
         const { message } = msg;
@@ -108,30 +133,34 @@ class App extends Component {
           this.setState({ tracks: message.data}); 
         }
       },
-      presence: (p) => {
-        console.log(p);
-        let users = [this.state.users];
-        if (p.action === 'join') {
-          if (users.includes(p.uuid)) {
-            users = [ ...users, p.uuid ];
+      presence: (pres) => {
+        console.log(pres);
+        let users = [...this.state.users];
+        if (pres.action === 'join') {
+          if (!users.includes(pres.uuid)) {
+            users = [...users, pres.uuid];
             this.setState({ users: users });
           }
-        } else if (p.action === 'leave' || p.action === 'timeout') {
-          let userId = users.indexOf(p.uuid);
+        } else if (pres.action === 'leave' || pres.action === 'timeout') {
+          let userId = users.indexOf(pres.uuid);
+          // console.log(userId);
           if (userId !== -1) {
             users = [ ...users ];
             users.splice(userId, 1);
+            // console.log(users);
             this.setState({ users: users });
           }
         }
         this.getUsers();
       }         
-    });
+    });    
   }
 
   unsubscribe() {
     this.pubnub.unsubscribe({ channels: ['tracks'] });
     this.pubnub.removeListener('message');
+    this.pubnub.removeListener('presence');
+    this.pubnub.clean('tracks');
   }
 
   publishTrack(type, data) {
@@ -148,6 +177,16 @@ class App extends Component {
     console.log(users);
   }
 
+  renderUsers() {
+    const { users, userId } = this.state;
+    return users.map(user =>
+      user === userId ?
+        (<li key={user} className="user-list__item current-user" id='currentUser'>{user}</li>)
+      : 
+        (<li key={user} className="user-list__item">{user}</li>)  
+    );
+  }
+  
   toggleClick() {
     const { click } = this.state;
     const { clickSeq } = this.props;
@@ -213,6 +252,10 @@ class App extends Component {
             <h2 className="App-intro text-center my-5">
               Hello Tone
             </h2>
+            <div className="p-absolute user-list-wrapper">
+              <h5>Users</h5>
+              <ul className="module-user-list list-unstyled">{this.renderUsers()}</ul>
+            </div>  
             <div className="module-controls text-center">
               <div className="mb-2">
                 <button

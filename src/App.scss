@@ -9,3 +9,18 @@
   font-weight: 600;
 }
 
+.user-list-wrapper {
+  position: absolute;
+  top: 0;
+  right: 0;
+}
+.module-user-list, .user-list {
+  list-style: none;
+  &__item {
+    margin-bottom: .5rem;
+    &.current-user {
+      color: theme-color("success");
+    }
+  }
+}
+

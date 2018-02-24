@@ -6112,3 +6112,15 @@ a.text-dark:hover, a.text-dark:focus {
 .App-intro {
   font-size: 1.5rem;
   font-weight: 600; }
+
+.user-list-wrapper {
+  position: absolute;
+  top: 0;
+  right: 0; }
+
+.module-user-list, .user-list {
+  list-style: none; }
+  .module-user-list__item, .user-list__item {
+    margin-bottom: .5rem; }
+    .module-user-list__item.current-user, .user-list__item.current-user {
+      color: #28a745; }
