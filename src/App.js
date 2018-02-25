@@ -19,11 +19,12 @@ class App extends Component {
       currentBeat: -1,
       bpm: 80,
       tracks: model.defaultSequence,
-      users: [this.props.user],
-      userId: this.props.user,
+      users: [this.props.user.userName],
+      userId: this.props.user.userName,
     };
     // pubnub
     let uuid = this.state.userId;
+    /*
     this.pubnub = new PubNubReact({
       publishKey: 'pub-c-08a9d77b-56c3-4db2-9328-38a797ff3150',
       subscribeKey: 'sub-c-00ca6876-17b9-11e8-bb84-266dd58d78d1',
@@ -31,6 +32,7 @@ class App extends Component {
       presenceTimeout: 130,
     });
     this.pubnub.init(this);
+    */
     this.publishTrack = this.publishTrack.bind(this);
     this.addListeners = this.addListeners.bind(this);
     this.getUsers = this.getUsers.bind(this);
@@ -51,9 +53,11 @@ class App extends Component {
   }
 
   componentWillMount() {
+    /*
     this.pubnub.clean('tracks');
     this.subscribeTo();   
     this.addListeners(); 
+    */
   }
 
   componentDidMount() {
@@ -63,11 +67,11 @@ class App extends Component {
     Tone.Transport.setLoopPoints(0, '1m');
     Tone.Transport.loop = true;
     console.log(userId);
-    window.addEventListener('beforeunload', this.unsubscribe);
+    // window.addEventListener('beforeunload', this.unsubscribe);
   }
 
   componentWillUnmount() {
-    this.unsubscribe();
+    // this.unsubscribe();
   }
 
   setTransportBPM(newBpm) {
@@ -89,7 +93,7 @@ class App extends Component {
   subscribeTo() {
     this.pubnub.subscribe({
       channels: ['tracks'],
-      // withPresence: true,
+      withPresence: true,
     });
     this.pubnub.getMessage('tracks', (msg) => {
       const { message } = msg;
@@ -191,10 +195,8 @@ class App extends Component {
     const { click } = this.state;
     const { clickSeq } = this.props;
     if (!click) {
-      // console.log('start click');
       clickSeq.start();
     } else {
-      // console.log('stop click');
       clickSeq.stop();
     }
     this.setState({ click: !click });
@@ -203,7 +205,6 @@ class App extends Component {
   toggleTrackBeat(trackId) {
     const { tracks, currentBeat } = this.state;
     this.updateTracks(model.toggleTrackBeat(tracks, trackId, currentBeat));
-    // console.log(model.toggleTrackBeat(tracks, trackId, currentBeat));
   }
 
   clearTrackBeat(trackId) {
@@ -229,8 +230,7 @@ class App extends Component {
     this.loop = sequencer
       .update(this.loop, newTracks, this.updateCurrentBeat, this.timeNotifier, this.props.players);
     this.setState({ tracks: newTracks });
-    this.publishTrack('riff', newTracks);    
-    // console.log(newTracks);
+    // this.publishTrack('riff', newTracks);    
   }
 
   toogleRecord() {

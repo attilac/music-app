@@ -11,7 +11,14 @@ import * as users from './data/users';
 const players = sequencer.createPlayers(model.defaultSequence);
 const clickSynth = sequencer.createClickSynth();
 const clickSeq = sequencer.click(clickSynth);
-const user = users.makeUserName();
+
+// localStorage.removeItem('currentUser');
+console.log(users.fetchCurrentUser());
+
+if (users.fetchCurrentUser() === '') {
+  users.storeCurrentUser({'userName': users.makeUserName()});   
+} 
+const user = users.fetchCurrentUser();
 
 const initProps = {
   sequencer,
