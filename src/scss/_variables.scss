@@ -121,7 +121,7 @@ $grays: map-merge((
   "900": $gray-900
 ), $grays);
 
-$blue:    #4b7bec !default;
+$blue:    #4fc3f7 !default;
 $indigo:  #6610f2 !default;
 $purple:  #6f42c1 !default;
 $pink:    #e83e8c !default;
@@ -149,8 +149,8 @@ $colors: map-merge((
   "gray-dark":  $gray-800
 ), $colors);
 
-$primary:       #EAB543 !default;
-$secondary:     #333!default;
+$primary:       $blue !default;
+$secondary:     #222f3e !default;
 $success:       $green !default;
 $info:          $cyan !default;
 $warning:       $yellow !default;
@@ -227,8 +227,8 @@ $sizes: map-merge((
 //
 // Settings for the `<body>` element.
 
-$body-bg:                   #ecf0f1 !default;
-$body-color:                $gray-700 !default;
+$body-bg:                   rgba(22, 28, 36, 1)	!default;
+$body-color:                $white !default;
 
 // Links
 //

@@ -7,13 +7,25 @@ import registerServiceWorker from './registerServiceWorker';
 import * as model from './data/model';
 import * as sequencer from './modules/sequencer';
 import * as users from './data/users';
+import * as sampleKits from './data/sample-kits.json';
 
-const players = sequencer.createPlayers(model.defaultSequence);
+// const players = sequencer.createPlayers(model.defaultSequence);
 const clickSynth = sequencer.createClickSynth();
 const clickSeq = sequencer.click(clickSynth);
 
+function getKitSounds(kitName) {
+  return sampleKits.kits.find((item) =>
+    item.name === kitName ? item : null
+  );
+}
+const kit = 'A';
+const samples = getKitSounds(kit).sounds;
+const players = sequencer.createSamplePlayers(samples, kit);
+const defaultSequence = model.createDefaultSequence(samples, kit);
+// const defaultSequence = model.defaultSequence;
+
 // localStorage.removeItem('currentUser');
-console.log(users.fetchCurrentUser());
+// console.log(users.fetchCurrentUser());
 
 if (users.fetchCurrentUser() === '') {
   users.storeCurrentUser({'userName': users.makeUserName()});   
@@ -25,6 +37,9 @@ const initProps = {
   players,
   clickSeq,
   user,
+  defaultSequence,
+  samples,
+  kit,
 };
 
 ReactDOM.render(<App {...initProps} />, document.getElementById('root'));

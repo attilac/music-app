@@ -1,4 +1,13 @@
 .module-controls {
+  .btn {
+    color: rgba(187, 189, 192, 1);
+    &:hover,
+    &.active {
+      background-color: lighten($secondary, 10%) !important;
+      border-color: lighten($secondary, 10%) !important; 
+    }
+  }
+
   .transport-play {
     position: relative;
     padding-left: 32px;
@@ -21,6 +30,7 @@
 
     &:hover,
     &.active {
+      background-color: $secondary;
       .icon-play {
         &:before {
           border-left-color: $white;

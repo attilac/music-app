@@ -1,4 +1,5 @@
 import samples from './samples.json';
+import sampleKits from './sample-kits.json';
 
 export const settings = {
   transport: {
@@ -87,8 +88,21 @@ export const defaultSequence = [
     muted: false,
     beats: [],
     key: 'p',
-  },
+  }, 
 ];
+
+export function createDefaultSequence(samples, kitName) {
+  return samples.map((item, index) => 
+    ({ 
+      id: index,
+      path: `${settings.basePath}${kitName}/${item.file}`,
+      vol: -6,
+      muted: false,
+      beats: [],
+      key: item.key,
+    })
+  )
+}
 
 export function toggleTrackBeat(tracks, id, beat) {
   return tracks.map((track) => {
@@ -115,5 +129,23 @@ function beatReplacer(beats, beat) {
     newBeats = [...beats, beat];
   }
   return newBeats;
+}
+
+export function getSampleByKey(key, kitName) {
+  const kit = sampleKits.kits.find(item => 
+    item.name === kitName
+  );
+  if (!kit) { return; } 
+
+  const samples = kit.sounds;
+  // console.log(samples);
+
+  const sample = samples.find(item =>
+    item.key === key
+  );
+  if (!sample) { return; }
+  // console.log(sample);
+  
+  return sample.file;
 }
 

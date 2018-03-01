@@ -8,29 +8,53 @@ class DrumPadList extends Component {
     this.state = {};
   }
 
+  createRow(row) {
+    return row.map(key =>
+      this.createKey(key)
+    );
+  }
+  
+  createKey(key) {
+    const result = this.props.samples.find( item => item.key === key );
+    if (typeof result === 'object') {
+      return (
+        <DrumPad
+          key={`${result.path}`}
+          sample={result.path}
+          title={result.key}
+          trackId={result.id}
+          vol={result.vol}
+          beats={result.beats}
+          {...this.props}
+      />        
+      )
+    } else {
+      return null;
+    }
+  }
+
   getDrumPadList() {
     const { samples } = this.props;
-    // console.log(samples);
-    return samples.map((item, index) =>
+    // console.log(samples); 
+    const rows = [
+      // ["`", "1", "2", "3", "4", "5", "6", "7", "8", "9", "0", "-", "=", "delete"],
+      ['q', 'w', 'e', 'r', 't', 'y', 'u', 'i', 'o', 'p'],
+      ['a', 's', 'd', 'f', 'g', 'h', 'j', 'k', 'l'],
+      ['z', 'x', 'c', 'v', 'b', 'n', 'm'],
+    ];
+    return rows.map((row, rowIndex) =>
       (
-        <DrumPad
-          key={`${item.path}`}
-          sample={item.path}
-          title={item.key}
-          trackId={item.id}
-          vol={item.vol}
-          beats={samples[index].beats}
-          {...this.props}
-        />
-      ));
+        <div className="drumpad-list" key={rowIndex}>
+          { this.createRow(row) }
+        </div>  
+      )
+    )
   }
 
   render() {
     return (
       <div className="module module-drumpad-list">
-        <div className="drumpad-list">
-          { this.getDrumPadList() }
-        </div>
+        { this.getDrumPadList() }
       </div>
     );
   }

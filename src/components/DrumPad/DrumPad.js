@@ -98,7 +98,7 @@ class DrumPad extends Component {
         />
         <button
           onClick={this.onClick}
-          className={`pad btn btn-outline-secondary ${activeClass}`}
+          className={`pad btn btn-secondary ${activeClass}`}
         >
           { title }
         </button>

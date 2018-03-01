@@ -1,0 +1,66 @@
+{
+  "kits": [
+    {
+      "name": "A",
+      "sounds": [
+        {"file":"flash-1.mp3", "key":"q"},
+        {"file":"clay.mp3", "key":"w"}, 
+        {"file":"moon.mp3", "key":"e"}, 
+        {"file":"piston-1.mp3", "key":"r"}, 
+        {"file":"timer.mp3", "key":"t"}, 
+        {"file":"suspension.mp3", "key":"y"}, 
+        {"file":"prism-1.mp3", "key":"u"}, 
+        {"file":"squiggle.mp3", "key":"i"}, 
+        {"file":"glimmer.mp3", "key":"o"}, 
+        {"file":"dotted-spiral.mp3", "key":"p"},
+        {"file":"flash-2.mp3", "key":"a"},
+        {"file":"veil.mp3", "key":"s"},
+        {"file":"ufo.mp3", "key":"d"},
+        {"file":"piston-2.mp3", "key":"f"},
+        {"file":"bubbles.mp3", "key":"g"},
+        {"file":"strike.mp3", "key":"h"},
+        {"file":"prism-2.mp3", "key":"j"},
+        {"file":"pinwheel.mp3", "key":"k"},
+        {"file":"zig-zag.mp3", "key":"l"},
+        {"file":"flash-3.mp3", "key":"z"},
+        {"file":"wipe.mp3", "key":"x"},
+        {"file":"splits.mp3", "key":"c"},
+        {"file":"piston-3.mp3", "key":"v"},
+        {"file":"corona.mp3", "key":"b"},
+        {"file":"confetti.mp3", "key":"n"},
+        {"file":"prism-3.mp3", "key":"m"}
+      ]
+    },
+    {
+      "name": "B",
+      "sounds": [
+        {"file":"ClosedHH_Fiasco.wav", "key":"q"},
+        {"file":"Kick_808_4.wav", "key":"w"}, 
+        {"file":"BollyVox_3.wav", "key":"e"}, 
+        {"file":"Snare_808_4.wav", "key":"r"}, 
+        {"file":"Chord_GuitarShort_3.wav", "key":"t"}, 
+        {"file":"Seventh_Dakeat.wav", "key":"y"}, 
+        {"file":"Snare_Gold_1.wav", "key":"u"}, 
+        {"file":"Kick_808_4.wav", "key":"i"}, 
+        {"file":"Kick_808_4.wav", "key":"o"}, 
+        {"file":"Kick_808_4.wav", "key":"p"},
+        {"file":"Kick_808_4.wav", "key":"a"},
+        {"file":"Kick_808_4.wav", "key":"s"},
+        {"file":"Kick_808_4.wav", "key":"d"},
+        {"file":"Kick_808_4.wav", "key":"f"},
+        {"file":"Kick_808_4.wav", "key":"g"},
+        {"file":"Kick_808_4.wav", "key":"h"},
+        {"file":"Kick_808_4.wav", "key":"j"},
+        {"file":"Kick_808_4.wav", "key":"k"},
+        {"file":"Kick_808_4.wav", "key":"l"},
+        {"file":"Kick_808_4.wav", "key":"z"},
+        {"file":"Kick_808_4.wav", "key":"x"},
+        {"file":"Kick_808_4.wav", "key":"c"},
+        {"file":"Kick_808_4.wav", "key":"v"},
+        {"file":"Kick_808_4.wav", "key":"b"},
+        {"file":"Kick_808_4.wav", "key":"n"},
+        {"file":"Kick_808_4.wav", "key":"m"}
+      ]
+    }    
+  ]
+}
