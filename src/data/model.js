@@ -114,7 +114,7 @@ export function toggleTrackBeat(tracks, id, beat) {
   });
 }
 
-export function clearTrackBeat(tracks, id) {
+export function resetTrack(tracks, id) {
   return tracks.map((track) => {
     if (track.id !== id) {
       return track;

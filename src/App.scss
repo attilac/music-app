@@ -4,23 +4,48 @@
 @import './components/DrumPadList/drumpad-list.scss';
 @import './components/Controls/controls.scss';
 
-.App-intro {
+html, body, #root {
+  height: 100%;
+} 
+
+.song-title {
   font-size: 1.5rem;
   font-weight: 600;
+  width: auto;
+  background-color: transparent;
+  color: #fff;
+  border-radius: 0;
+  border-left-color: transparent;
+  border-right-color: transparent;
+  border-top-color: transparent;
+  border-bottom-color: rgba(255, 255, 255, .1);
+  &:focus {
+    background-color: transparent;
+    color: #fff;
+    border-left-color: transparent;
+    border-right-color: transparent;
+    border-top-color: transparent;    
+    border-bottom-color: rgba(255, 255, 255, .2);
+    box-shadow: none;  
+  }
 }
 
-.user-list-wrapper {
+.main {
+  flex-grow: 1;
+}
+
+.module-user {
   position: absolute;
   top: 0;
   right: 0;
-}
-.module-user-list, .user-list {
-  list-style: none;
-  &__item {
-    margin-bottom: .5rem;
-    &.current-user {
-      color: #48dbfb;
+  .user-list {
+    list-style: none;
+    &__item {
+      margin-bottom: .5rem;
+      &.current-user {
+        color: #48dbfb;
+      }
     }
-  }
+  }  
 }
 

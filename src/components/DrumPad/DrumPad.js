@@ -11,7 +11,7 @@ class DrumPad extends Component {
     this.onClick = this.onClick.bind(this);
     this.onKeyDown = this.onKeyDown.bind(this);
     this.onKeyUp = this.onKeyUp.bind(this);
-    this.clearTrackBeat = this.clearTrackBeat.bind(this);
+    this.resetTrack = this.resetTrack.bind(this);
   }
 
   componentDidMount() {
@@ -45,7 +45,7 @@ class DrumPad extends Component {
       // console.log(`${sample} was pressed`);
       this.setState({ active: !this.state.active });
       if (erase) {
-        this.clearTrackBeat();
+        this.resetTrack();
       } else {
         this.playSound();
       }
@@ -59,9 +59,9 @@ class DrumPad extends Component {
     }
   }
 
-  clearTrackBeat() {
-    const { trackId, clearTrackBeat } = this.props;
-    clearTrackBeat(trackId);
+  resetTrack() {
+    const { trackId, resetTrack } = this.props;
+    resetTrack(trackId);
     console.log('Erasing track');
   }
 
@@ -119,7 +119,7 @@ DrumPad.defaultProps = {
 
 DrumPad.propTypes = {
   beats: PropTypes.arrayOf(PropTypes.number),
-  clearTrackBeat: PropTypes.func.isRequired,
+  resetTrack: PropTypes.func.isRequired,
   currentBeat: PropTypes.number,
   erase: PropTypes.bool,
   muted: PropTypes.bool,

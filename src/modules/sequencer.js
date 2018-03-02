@@ -21,18 +21,18 @@ export function createSamplePlayers(sounds, kit) {
   return samplePlayers;
 }
 
-export function create(tracks, beatNotifier, timeNotifier, samplePlayers, kit) {
+export function create(tracks, beatNotifier, transportPositionNotifier, samplePlayers, kit) {
   // new Tone.Sequence ( callback , events , subdivision )
   const loop = new Tone.Sequence(
-    loopHandler(tracks, beatNotifier, timeNotifier, samplePlayers, kit),
+    loopHandler(tracks, beatNotifier, transportPositionNotifier, samplePlayers, kit),
     new Array(16).fill(0).map((_, i) => i),
     '16n',
   );
   return loop;
 }
 
-export function update(loop, tracks, beatNotifier, timeNotifier, samplePlayers, kit) {
-  loop.callback = loopHandler(tracks, beatNotifier, timeNotifier, samplePlayers, kit);
+export function update(loop, tracks, beatNotifier, transportPositionNotifier, samplePlayers, kit) {
+  loop.callback = loopHandler(tracks, beatNotifier, transportPositionNotifier, samplePlayers, kit);
   return loop;
 }
 
@@ -40,10 +40,10 @@ export function setBPM(bpm) {
   Tone.Transport.bpm.value = bpm;
 }
 
-function loopHandler(tracks, beatNotifier, timeNotifier, samplePlayers, kit) {
+function loopHandler(tracks, beatNotifier, transportPositionNotifier, samplePlayers, kit) {
   return (time, index) => {
     beatNotifier(index);
-    timeNotifier();
+    transportPositionNotifier();
     tracks.forEach(({ path, vol, muted, beats, key }) => {
       if (beats.includes(index)) {
         try {
@@ -71,16 +71,10 @@ export function click(inst) {
   return loop;
 }
 
-function clickHandler(inst) {
+export function clickHandler(inst, vol) {
   return (time, note) => {
-    try {
-      // console.log('Click ', note);
-      // console.log(inst);
-      inst.triggerAttackRelease(note, '16n');
-    } catch (e) {
-      console.log(e, 'Sample buffer not loaded');
-    }
-  };
+    inst.triggerAttackRelease(note, '16n');
+  }
 }
 
 export function createClickSynth() {
@@ -97,4 +91,8 @@ export function createClickSynth() {
   }).toMaster();
   synth.volume.value = -6;
   return synth;
+}
+
+export function between(x, min, max) {
+  return x >= min && x <= max;
 }

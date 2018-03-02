@@ -9,10 +9,6 @@ import * as sequencer from './modules/sequencer';
 import * as users from './data/users';
 import * as sampleKits from './data/sample-kits.json';
 
-// const players = sequencer.createPlayers(model.defaultSequence);
-const clickSynth = sequencer.createClickSynth();
-const clickSeq = sequencer.click(clickSynth);
-
 function getKitSounds(kitName) {
   return sampleKits.kits.find((item) =>
     item.name === kitName ? item : null
@@ -20,9 +16,12 @@ function getKitSounds(kitName) {
 }
 const kit = 'A';
 const samples = getKitSounds(kit).sounds;
+// const players = sequencer.createPlayers(model.defaultSequence);
 const players = sequencer.createSamplePlayers(samples, kit);
 const defaultSequence = model.createDefaultSequence(samples, kit);
 // const defaultSequence = model.defaultSequence;
+const clickSynth = sequencer.createClickSynth();
+const clickSeq = sequencer.click(clickSynth);
 
 // localStorage.removeItem('currentUser');
 // console.log(users.fetchCurrentUser());
@@ -40,6 +39,7 @@ const initProps = {
   defaultSequence,
   samples,
   kit,
+  clickSynth,
 };
 
 ReactDOM.render(<App {...initProps} />, document.getElementById('root'));

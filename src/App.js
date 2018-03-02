@@ -22,17 +22,19 @@ class App extends Component {
       playing: false,
       record: false,
       currentBeat: -1,
-      bpm: 80,
+      bpm: 120,
       samples: this.props.samples,
       kit: this.props.kit,
-      songId: ' ',
+      songId: '',
+      songTitle: 'Hello Tone',
+      transportPosition: '0:0:0',
       tracks: this.props.defaultSequence,
       users: [this.props.user.userName],
       userId: this.props.user.userName,
     };
     // pubnub
-    let uuid = this.state.userId;
     /*
+    let uuid = this.state.userId;
     this.pubnub = new PubNubReact({
       publishKey: 'pub-c-08a9d77b-56c3-4db2-9328-38a797ff3150',
       subscribeKey: 'sub-c-00ca6876-17b9-11e8-bb84-266dd58d78d1',
@@ -48,47 +50,43 @@ class App extends Component {
     this.unsubscribe = this.unsubscribe.bind(this);
     //firestore
     this.loadTrackFromFirestore = this.loadTrackFromFirestore.bind(this);
+    this.saveToFirestore = this.saveToFirestore.bind(this);
+    this.updateTrackInFirestore = this.updateTrackInFirestore.bind(this);
     // music app
-    this.createLoop = this.createLoop.bind(this);
+    this.createSequence = this.createSequence.bind(this);
     this.startTransport = this.startTransport.bind(this);
     this.stopTransport = this.stopTransport.bind(this);
-    this.updateCurrentBeat = this.updateCurrentBeat.bind(this);
-    this.timeNotifier = this.timeNotifier.bind(this);
+    this.setTransportBPM = this.setTransportBPM.bind(this);
+    this.transportPositionNotifier = this.transportPositionNotifier.bind(this);
+    this.beatNotifier = this.beatNotifier.bind(this);
     this.toggleTrackBeat = this.toggleTrackBeat.bind(this);
+    this.resetTrack = this.resetTrack.bind(this);
     this.toggleClick = this.toggleClick.bind(this);
-    this.clearTrackBeat = this.clearTrackBeat.bind(this);
     this.toggleEraseMode = this.toggleEraseMode.bind(this);
     this.toggleRecord = this.toggleRecord.bind(this);
+
+    this.handleTitleChange = this.handleTitleChange.bind(this);
+    this.handleTitleKeyPress = this.handleTitleKeyPress.bind(this);
   }
 
   componentWillMount() {
-    // this.pubnub.clean('tracks');
-    // this.subscribeTo();   
-    // this.addListeners(); 
+    /*
+    this.pubnub.clean('tracks');
+    this.subscribeTo();   
+    this.addListeners(); 
+    */
   }
 
   componentDidMount() {
-    const { userId } = this.state;
-    // this.createLoop(this.props.defaultSequence);
-
+    // const { userId } = this.state;
+    // this.createSequence(this.props.defaultSequence); 0;
     // this.saveToFirestore('Default Pattern', true);
-    this.loadTrackFromFirestore('0TFwRd72Jyocsg70hyju');
+    this.loadTrackFromFirestore('sgm9PttUn53mc9lt5wty');
     // window.addEventListener('beforeunload', this.unsubscribe);
   }
 
   componentWillUnmount() {
     // this.unsubscribe();
-  }
-
-  createLoop(tracks) {
-    const { bpm } = this.state;
-    this.loop = this.props.sequencer
-    .create(tracks, this.updateCurrentBeat, this.timeNotifier, this.props.players, this.state.kit);    
-    this.loop.start();
-    this.setTransportBPM(bpm);
-    Tone.Transport.setLoopPoints(0, '1m');
-    Tone.Transport.loop = true;
-    this.setState({ tracks: tracks });
   }
 
   loadTrackFromFirestore(trackId) {
@@ -99,8 +97,10 @@ class App extends Component {
         if (doc.exists) {        
           // console.log(doc.id, " => ", doc.data().channels);
           const song = doc.data();
-          this.createLoop(song.channels);
+          const bpm = parseInt(song.bpm, 10);
+          this.setState({ songTitle: song.name });
           this.setState({ songId: doc.id });
+          this.createSequence(song.channels, bpm);
         } else {
           console.log('No such document');          
         }       
@@ -111,32 +111,35 @@ class App extends Component {
   }
 
   saveToFirestore(title, isPublic) {
-    const { tracks, userId } = this.state;
+    const { tracks, userId, bpm } = this.state;
     const song = {
       name: title,
       public: isPublic,
       channels: tracks,
       user: userId,
+      bpm: bpm,
     }
     // console.log(song);
     db.collection('tracks')
       .add(song)
-      .then(function(docRef) {
+      .then(docRef => {
         console.log('Document successfully written!');
         console.log("Document written with ID: ", docRef.id);
+        this.setState({ songId: docRef.id });
       })
-      .catch(function(error) {
+      .catch(error => {
         console.error('Error writing document: ', error);
       });  
   }
 
   updateTrackInFirestore() {
-    const { tracks, userId, songId } = this.state;
+    const { tracks, songId, bpm } = this.state;
     // console.log(songId);
     if (songId === '') { return; }
     const song = db.collection('tracks').doc(songId);
     return song.update({
-        channels: tracks,
+      bpm: bpm,
+      channels: tracks,
     })
     .then(function() {
         console.log('Document successfully updated!');
@@ -145,23 +148,6 @@ class App extends Component {
         // The document probably doesn't exist.
         console.error('Error updating document: ', error);
     });
-  }
-
-  setTransportBPM(newBpm) {
-    const { sequencer } = this.props;
-    sequencer.setBPM(newBpm);
-    this.setState({ bpm: newBpm });
-  }
-
-  startTransport() {
-    Tone.Transport.start();
-    this.setState({ playing: true });
-  }
-
-  stopTransport() {
-    Tone.Transport.stop();
-    this.setState({ currentBeat: -1, playing: false, record: false });
-    // this.updateTrackInFirestore();
   }
 
   subscribeTo() {
@@ -205,8 +191,8 @@ class App extends Component {
         // update if track is from different user
         if (message.userId !== this.state.userId) {
           console.log('Updating track from user ', message.userId);      
-          this.loop = this.props.sequencer
-            .update(this.loop, message.data, this.updateCurrentBeat, this.timeNotifier, this.props.players);   
+          this.sequence = this.props.sequencer
+            .update(this.sequence, message.data, this.beatNotifier, this.transportPositionNotifier, this.props.players);   
           this.setState({ tracks: message.data}); 
         }
       },
@@ -263,47 +249,80 @@ class App extends Component {
         (<li key={user} className="user-list__item">{user}</li>)  
     );
   }
-  
-  toggleClick() {
-    const { click } = this.state;
-    const { clickSeq } = this.props;
-    if (!click) {
-      clickSeq.start();
-    } else {
-      clickSeq.stop();
-    }
-    this.setState({ click: !click });
+
+  createSequence(tracks, bpm) {
+    const { kit } = this.state;
+    const { players } = this.props;
+    this.sequence = this.props.sequencer.create(tracks, this.beatNotifier, this.transportPositionNotifier, players, kit);    
+    this.sequence.start();
+    this.setTransportBPM(bpm);
+    Tone.Transport.setLoopPoints(0, '1m');
+    Tone.Transport.loop = true;
+    this.setState({ tracks: tracks });
+
+    this.props.clickSynth.volume.value = -60; 
+    this.props.clickSeq.start();  
+  }
+
+  updateSequence(newTracks) {
+    const { sequencer, players } = this.props;
+    const { kit } = this.state;
+    this.sequence = sequencer
+      .update(this.sequence, newTracks, this.beatNotifier, this.transportPositionNotifier, players, kit);
+    this.setState({ tracks: newTracks });
+    // this.publishTrack('riff', newTracks);
   }
 
   toggleTrackBeat(trackId) {
-    const { tracks, currentBeat } = this.state;
-    this.updateTracks(model.toggleTrackBeat(tracks, trackId, currentBeat));
+    const { tracks, currentBeat, userId } = this.state;
+    this.updateSequence(model.toggleTrackBeat(tracks, trackId, currentBeat));
   }
 
-  clearTrackBeat(trackId) {
+  resetTrack(trackId) {
     const { tracks } = this.state;
-    this.updateTracks(model.clearTrackBeat(tracks, trackId));
+    this.updateSequence(model.resetTrack(tracks, trackId));
+  }
+
+  beatNotifier(beat) {
+    this.setState({ currentBeat: beat });
+  }
+
+  transportPositionNotifier() {
+    const position = Tone.TransportTime().toBarsBeatsSixteenths();
+    this.setState({ transportPosition: position });
+    // console.log(Tone.TransportTime().toSamples());
+  }
+
+  setTransportBPM(newBpm) {
+    const { sequencer } = this.props;
+    sequencer.setBPM(newBpm);
+    this.setState({ bpm: newBpm });
+  }
+
+  startTransport() {
+    Tone.Transport.start('+0.1');
+    this.setState({ playing: true });
+  }
+
+  stopTransport() {
+    Tone.Transport.stop();
+    this.setState({ currentBeat: -1, playing: false, record: false });
+    // this.updateTrackInFirestore();
   }
 
   toggleEraseMode() {
     this.setState({ erase: !this.state.erase });
-  }
-
-  updateCurrentBeat(beat) {
-    this.setState({ currentBeat: beat });
-  }
-
-  timeNotifier() {
-    // const barsBeats = Tone.TransportTime().toBarsBeatsSixteenths();
-    // console.log(barsBeats);
-  }
-
-  updateTracks(newTracks) {
-    const { sequencer } = this.props;
-    this.loop = sequencer
-      .update(this.loop, newTracks, this.updateCurrentBeat, this.timeNotifier, this.props.players, this.state.kit);
-    this.setState({ tracks: newTracks });
-    // this.publishTrack('riff', newTracks);
+  } 
+  
+  toggleClick() {
+    const { click } = this.state;
+    const { clickSynth } = this.props;
+    if (!click) {
+      clickSynth.volume.value = -6;
+    } else {
+      clickSynth.volume.value = -60;
+    }
+    this.setState({ click: !click });
   }
 
   toggleRecord() {
@@ -311,49 +330,82 @@ class App extends Component {
     this.setState({ record: !record });
   }
 
+  handleTitleChange(event) {
+    const { value } = event.target;
+    this.setState({ songTitle: value });
+  }
+
+  handleTitleKeyPress(event) {
+    if(event.keyCode === 13) {
+      const { songTitle } = this.state;
+      this.saveToFirestore(songTitle, true);
+    }
+  }
+
   render() {
-    const { click, currentBeat, tracks, record, playing, erase } = this.state;
+    const { click, 
+      currentBeat, 
+      tracks, 
+      record, 
+      playing, 
+      erase,
+      songTitle,
+      transportPosition, 
+      bpm 
+    } = this.state;
     const { players } = this.props;
     return (
-      <div className="container pt-3">
-        <div className="row">
-          <div className="col pb-3">
-            <h2 className="App-intro text-center my-5">
-              Hello Tone
-            </h2>
-            <div className="p-absolute user-list-wrapper">
-              <h5>Users</h5>
-              <ul className="module-user-list list-unstyled">{this.renderUsers()}</ul>
+      <div className="app container-fluid h-100">      
+        <div className="module-user p-absolute p-3">
+          <h5>Users</h5>
+          <ul className="user-list list-unstyled">{this.renderUsers()}</ul>
+        </div>          
+        <div className="row h-100">
+          <div className="col fluid d-flex flex-column">
+            <div className="row justify-content-center">
+              <div className="">
+                <input 
+                  className="form-control song-title mt-5 text-center"
+                  type="text"
+                  value={songTitle}
+                  onChange={this.handleTitleChange}
+                  onKeyDown={this.handleTitleKeyPress}
+                />
+              </div>  
+            </div>               
+            <div className="main row justify-content-center align-items-center">           
+              { 
+                <DrumPadList
+                  players={players}
+                  samples={tracks}
+                  record={record}
+                  playing={playing}
+                  currentBeat={currentBeat}
+                  toggleTrackBeat={this.toggleTrackBeat}
+                  resetTrack={this.resetTrack}
+                  erase={erase}
+                />
+              }
             </div>  
-            <Controls
-              click={click}
-              record={record}
-              playing={playing}
-              erase={erase}
-              startTransport={this.startTransport} 
-              stopTransport={this.stopTransport}
-              toggleRecord={this.toggleRecord}
-              toggleEraseMode={this.toggleEraseMode}
-              toggleClick={this.toggleClick}
-            />  
-          </div>
-        </div>
-        <div className="row justify-content-center mt-5">
-          <div className="col">
-          { 
-            <DrumPadList
-              players={players}
-              samples={tracks}
-              record={record}
-              playing={playing}
-              currentBeat={currentBeat}
-              toggleTrackBeat={this.toggleTrackBeat}
-              clearTrackBeat={this.clearTrackBeat}
-              erase={erase}
-            />
-          }
-          </div>
-        </div>
+            <div className="row">
+              <Controls
+                click={click}
+                record={record}
+                playing={playing}
+                erase={erase}
+                saveTrack={this.updateTrackInFirestore}
+                setTransportBPM={this.setTransportBPM}
+                startTransport={this.startTransport} 
+                stopTransport={this.stopTransport}
+                tempo={bpm}
+                toggleRecord={this.toggleRecord}
+                toggleEraseMode={this.toggleEraseMode}
+                toggleClick={this.toggleClick}
+                transportPosition={transportPosition}
+              />   
+            </div>                 
+          </div>         
+        </div>  
       </div>
     );
   }

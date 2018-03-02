@@ -1,21 +1,45 @@
 .module-controls {
+  height: 7rem;
+  &--blue-lighter {
+    background-color: darken($secondary, 5%);
+  }
+
   .btn {
     color: rgba(187, 189, 192, 1);
     &:hover,
     &.active {
-      background-color: lighten($secondary, 10%) !important;
-      border-color: lighten($secondary, 10%) !important; 
+      background-color: lighten($secondary, 15%) !important;
+      border-color: lighten($secondary, 15%) !important; 
     }
+  }
+
+  .btn-round {
+    width: 3rem;
+    height: 3rem;
+    border-radius: 50%;
+  }
+
+  .transport-container {
+    display: flex;
+    flex-direction: row;
+    flex: 1 0 auto;
+    justify-content: center;
+    align-items: center;
+    height: 100%;
+  }
+
+  .transport-position {
+    font-size: 1.5rem;
+    line-height: 1;
   }
 
   .transport-play {
     position: relative;
-    padding-left: 32px;
     .icon-play {
       position: absolute;
       top: 50%;
-      left: 10px;
-      transform: translate(0%, -50%);    
+      left: 55%;
+      transform: translate(-50%, -50%);    
       width: 19px;
       height: 16px;
       display: inline-block;
@@ -41,12 +65,11 @@
 
   .transport-stop {
     position: relative;
-    padding-left: 32px;
     .icon-stop {
       position: absolute;
       top: 50%;
-      left: 10px;
-      transform: translate(0%, -50%);
+      left: 50%;
+      transform: translate(-50%, -50%);
       width: 14px;
       height: 14px;
       display: inline-block;
@@ -71,12 +94,11 @@
 
   .transport-record {
     position: relative;
-    padding-left: 32px;
     .icon-record {
       position: absolute;
       top: 50%;
-      left: 10px;
-      transform: translate(0%, -50%);    
+      left: 50%;
+      transform: translate(-50%, -50%);    
       width: 16px;
       height: 16px;
       display: inline-block;
@@ -86,7 +108,7 @@
         width: 16px;
         height: 16px;    
         border-radius: 100%;
-        background-color: $body-color;
+        background-color: $red;
       }
     }
 
@@ -98,5 +120,18 @@
         }    
       }
     }    
-  }  
+  }
+
+  .tempo-controls { 
+    input.tempo {
+      text-align: center;
+      width: 60px;
+      background-color: transparent;
+      border-color: rgba(255, 255, 255, .1);
+      color: #fff;
+    }
+    .click {
+      width: 50px;
+    }
+  }
 }
