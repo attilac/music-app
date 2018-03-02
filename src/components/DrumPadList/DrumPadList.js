@@ -34,8 +34,6 @@ class DrumPadList extends Component {
   }
 
   getDrumPadList() {
-    const { samples } = this.props;
-    // console.log(samples); 
     const rows = [
       // ["`", "1", "2", "3", "4", "5", "6", "7", "8", "9", "0", "-", "=", "delete"],
       ['q', 'w', 'e', 'r', 't', 'y', 'u', 'i', 'o', 'p'],
