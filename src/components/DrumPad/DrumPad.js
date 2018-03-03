@@ -15,14 +15,6 @@ class DrumPad extends Component {
   }
 
   componentDidMount() {
-    const {
-      players,
-      sample,
-      muted,
-      vol,
-    } = this.props;
-    players.get(sample).mute = muted;
-    players.get(sample).volume.value = vol;
   }
 
   componentWillReceiveProps(nextProps) {
@@ -67,7 +59,7 @@ class DrumPad extends Component {
 
   playSound() {
     const { record, sample, players, playing } = this.props;
-
+    players.get(sample).volume.value = -6;
     if (playing) {
       // players.get(sample).start(Tone.Transport.nextSubdivision('16n'), 0, '1n');
       players.get(sample).start(AudioContext.currentTime, 0, '1n');

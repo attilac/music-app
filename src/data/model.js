@@ -131,6 +131,26 @@ function beatReplacer(beats, beat) {
   return newBeats;
 }
 
+export function copyBeatsToNewBars(beats, resolution, bars) {
+  // console.log(beats);
+  if (beats.length === 0) { return beats; }
+  let newBeats;
+  newBeats = beats.map(beat => 
+    beat + resolution
+  )
+  const concatBeatsArray = [...beats, ...newBeats];
+  // console.log(concatBeatsArray);
+  return concatBeatsArray;
+}
+
+export function trimBeatsFromBars(beats, resolution, bars) {
+  const beatLength = bars * resolution;
+  // console.log(beats);
+  return beats.filter(beat =>
+    beat < beatLength
+  );
+}
+
 export function getSampleByKey(key, kitName) {
   const kit = sampleKits.kits.find(item => 
     item.name === kitName

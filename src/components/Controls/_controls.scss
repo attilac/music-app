@@ -31,6 +31,10 @@
   .transport-position {
     font-size: 1.5rem;
     line-height: 1;
+    width: 105px;
+    p {
+      width: 100%;
+    }
   }
 
   .transport-play {
@@ -122,7 +126,17 @@
     }    
   }
 
+  .bars-select-wrapper {
+    width: 90px;
+    select.custom-select {
+      background-color: transparent;
+      border-color: rgba(255, 255, 255, .1);
+      color: #fff;
+    }
+  }
+
   .tempo-controls { 
+    text-align: center;
     input.tempo {
       text-align: center;
       width: 60px;

@@ -25,9 +25,9 @@ class App extends Component {
       bpm: 120,
       samples: this.props.samples,
       kit: this.props.kit,
+      bars: 1,
       songId: '',
       songTitle: 'Hello Tone',
-      transportPosition: '0:0:0',
       tracks: this.props.defaultSequence,
       users: [this.props.user.userName],
       userId: this.props.user.userName,
@@ -54,9 +54,11 @@ class App extends Component {
     this.updateTrackInFirestore = this.updateTrackInFirestore.bind(this);
     // music app
     this.createSequence = this.createSequence.bind(this);
+    this.copyBeatsToPatternLength = this.copyBeatsToPatternLength.bind(this);
     this.startTransport = this.startTransport.bind(this);
     this.stopTransport = this.stopTransport.bind(this);
     this.setTransportBPM = this.setTransportBPM.bind(this);
+    this.setPatternLength = this.setPatternLength.bind(this);
     this.transportPositionNotifier = this.transportPositionNotifier.bind(this);
     this.beatNotifier = this.beatNotifier.bind(this);
     this.toggleTrackBeat = this.toggleTrackBeat.bind(this);
@@ -81,7 +83,7 @@ class App extends Component {
     // const { userId } = this.state;
     // this.createSequence(this.props.defaultSequence); 0;
     // this.saveToFirestore('Default Pattern', true);
-    this.loadTrackFromFirestore('sgm9PttUn53mc9lt5wty');
+    this.loadTrackFromFirestore('iOb0ZkKGaanR578aTpcE');
     // window.addEventListener('beforeunload', this.unsubscribe);
   }
 
@@ -95,12 +97,15 @@ class App extends Component {
       .get()
       .then(doc => {
         if (doc.exists) {        
-          // console.log(doc.id, " => ", doc.data().channels);
+          // console.log(doc.id, " => ", doc.data());
           const song = doc.data();
           const bpm = parseInt(song.bpm, 10);
           this.setState({ songTitle: song.name });
           this.setState({ songId: doc.id });
+          this.setState({ bpm: bpm });
+          this.setState({ bars: song.bars });
           this.createSequence(song.channels, bpm);
+          // this.copyBeatsToPatternLength();
         } else {
           console.log('No such document');          
         }       
@@ -111,13 +116,14 @@ class App extends Component {
   }
 
   saveToFirestore(title, isPublic) {
-    const { tracks, userId, bpm } = this.state;
+    const { tracks, userId, bpm, bars } = this.state;
     const song = {
       name: title,
       public: isPublic,
       channels: tracks,
       user: userId,
       bpm: bpm,
+      bars: bars,
     }
     // console.log(song);
     db.collection('tracks')
@@ -133,12 +139,13 @@ class App extends Component {
   }
 
   updateTrackInFirestore() {
-    const { tracks, songId, bpm } = this.state;
+    const { tracks, songId, bpm, bars } = this.state;
     // console.log(songId);
     if (songId === '') { return; }
     const song = db.collection('tracks').doc(songId);
     return song.update({
       bpm: bpm,
+      bars: bars,
       channels: tracks,
     })
     .then(function() {
@@ -251,12 +258,18 @@ class App extends Component {
   }
 
   createSequence(tracks, bpm) {
-    const { kit } = this.state;
+    const { kit, bars } = this.state;
     const { players } = this.props;
-    this.sequence = this.props.sequencer.create(tracks, this.beatNotifier, this.transportPositionNotifier, players, kit);    
+    this.sequence = this.props.sequencer.create(tracks, 
+      this.beatNotifier, 
+      this.transportPositionNotifier, 
+      players, 
+      kit,
+      bars
+    );    
     this.sequence.start();
     this.setTransportBPM(bpm);
-    Tone.Transport.setLoopPoints(0, '1m');
+    Tone.Transport.setLoopPoints(0, `${bars}m`);
     Tone.Transport.loop = true;
     this.setState({ tracks: tracks });
 
@@ -283,14 +296,47 @@ class App extends Component {
     this.updateSequence(model.resetTrack(tracks, trackId));
   }
 
+  setPatternLength(bars) {
+    if (bars >= this.state.bars) {
+      this.copyBeatsToPatternLength(bars);
+    }
+    if (bars <= this.state.bars) {
+      this.trimBeatsToPatternLength(bars);  
+    }
+    this.setState({ bars: bars });
+    Tone.Transport.setLoopPoints(0, `${bars}m`);
+    // console.log(bars); 
+  }
+
+  trimBeatsToPatternLength(newBars) {
+    const { tracks, bars } = this.state;
+    const tempTracks = [...tracks];
+    tempTracks.map(track =>
+      track.beats = model.trimBeatsFromBars(track.beats, 16, newBars)
+    );
+    // console.log(temptracks);
+    this.setState({ tracks: tempTracks });  
+  }
+
+  copyBeatsToPatternLength(newBars) {
+    const { tracks, bars } = this.state;
+    const barsToInsert = newBars - bars;
+    console.log(barsToInsert);
+    const tempTracks = [...tracks];
+    tempTracks.map(track =>
+      track.beats = model.copyBeatsToNewBars(track.beats, 16, barsToInsert)
+    );
+
+  }
+
   beatNotifier(beat) {
     this.setState({ currentBeat: beat });
   }
 
   transportPositionNotifier() {
     const position = Tone.TransportTime().toBarsBeatsSixteenths();
-    this.setState({ transportPosition: position });
-    // console.log(Tone.TransportTime().toSamples());
+    return position;
+    // console.log(Tone.TransportTime().toBarsBeatsSixteenths());
   }
 
   setTransportBPM(newBpm) {
@@ -343,14 +389,15 @@ class App extends Component {
   }
 
   render() {
-    const { click, 
+    const { 
+      bars,
+      click, 
       currentBeat, 
       tracks, 
       record, 
       playing, 
       erase,
-      songTitle,
-      transportPosition, 
+      songTitle, 
       bpm 
     } = this.state;
     const { players } = this.props;
@@ -389,6 +436,7 @@ class App extends Component {
             </div>  
             <div className="row">
               <Controls
+                bars={bars}
                 click={click}
                 record={record}
                 playing={playing}
@@ -397,11 +445,12 @@ class App extends Component {
                 setTransportBPM={this.setTransportBPM}
                 startTransport={this.startTransport} 
                 stopTransport={this.stopTransport}
+                setPatternLength={this.setPatternLength}
                 tempo={bpm}
                 toggleRecord={this.toggleRecord}
                 toggleEraseMode={this.toggleEraseMode}
                 toggleClick={this.toggleClick}
-                transportPosition={transportPosition}
+                transportPositionNotifier={this.transportPositionNotifier}
               />   
             </div>                 
           </div>         

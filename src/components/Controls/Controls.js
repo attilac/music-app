@@ -1,5 +1,6 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
+// import Tone from 'tone';
 import * as sequencer from './../../modules/sequencer';
 
 class Controls extends Component {
@@ -7,9 +8,12 @@ class Controls extends Component {
     super(props);
     this.state = {
       tempo: this.props.tempo,
+      transportPosition: '0:0:0',
+      bars: this.props.bars,
     };
-    this.handleChange = this.handleChange.bind(this);
-    this.onKeyPress = this.onKeyPress.bind(this);
+    this.tempoInputOnChange = this.tempoInputOnChange.bind(this);
+    this.tempoInputOnKeyPress = this.tempoInputOnKeyPress.bind(this);
+    this.barsSelectOnChange = this.barsSelectOnChange.bind(this);
   }
 
   componentDidMount() {
@@ -17,19 +21,25 @@ class Controls extends Component {
   }
 
   componentWillReceiveProps(nextProps) {
-    const { tempo } = this.state;
+    const { tempo, bars } = this.state;
     if (nextProps.tempo !== tempo && !this.props.playing) {
-      console.log(nextProps.tempo);
+      // console.log(nextProps.tempo);
       this.setState({ tempo: nextProps.tempo });
     }
+    if (nextProps.bars !== bars) {
+      // console.log(nextProps.bars);
+      this.setState({ bars: nextProps.bars });
+    }    
+    const transportPosition =  this.props.transportPositionNotifier();
+    this.setState({ transportPosition: transportPosition });
   }
 
-  handleChange(e) {
+  tempoInputOnChange(e) {
     const { value } = e.target;
     this.setState({ tempo: value });
   }
 
-  onKeyPress(e){
+  tempoInputOnKeyPress(e) {
     const { value } = e.target;
     if(e.keyCode === 13) {
       if (sequencer.between(value, 60, 180)) {
@@ -39,7 +49,15 @@ class Controls extends Component {
         console.log('Unvalid input');
       }
     }
- }  
+ }
+ 
+ barsSelectOnChange(e) {
+  const { value } = e.target;
+  const bars = parseInt(value, 10);
+  this.setState({ bars: bars });
+  this.props.setPatternLength(bars);
+  // console.log(value); 
+ } 
 
   render() {
     const { 
@@ -53,9 +71,8 @@ class Controls extends Component {
       toggleRecord,
       toggleEraseMode,
       toggleClick,
-      transportPosition,
     } = this.props;
-    const { tempo } = this.state;
+    const { tempo, transportPosition, bars } = this.state;
     const activePlayClass = playing ? 'btn-secondary active' : 'btn-secondary';
     const activeRecordClass = record ? 'btn-secondary active' : 'btn-secondary';
     const activeEraseClass = erase ? 'btn-secondary active' : 'btn-secondary';
@@ -92,12 +109,24 @@ class Controls extends Component {
               <i className="icon-record" />            
             </button>
             <button
-              className={`btn erase-mode ${activeEraseClass}`}
+              className={`btn erase-mode btn-sm text-uppercase ${activeEraseClass} mr-2`}
               onClick={toggleEraseMode}
               title="Erase Mode"
             >
               Erase Mode
-            </button>                           
+            </button>   
+            <div className="bars-select-wrapper">
+              <select 
+                className="custom-select bars-select custom-select-sm"
+                onChange={this.barsSelectOnChange}
+                value={bars}
+              >
+                <option value="1">1 Bar</option>
+                <option value="2">2 Bars</option>
+                <option value="4">4 Bars</option>
+              </select>
+              <small>Pattern length</small>
+            </div>                                   
           </div>
 
           <div className="tempo-controls d-flex flex-row mr-4">
@@ -106,8 +135,8 @@ class Controls extends Component {
                 type="number" 
                 className="form-control tempo form-control-sm" 
                 value={tempo}
-                onChange={this.handleChange}
-                onKeyDown={this.onKeyPress}
+                onChange={this.tempoInputOnChange}
+                onKeyDown={this.tempoInputOnKeyPress}
                 min="60"
                 max="180"
               />

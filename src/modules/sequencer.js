@@ -21,11 +21,13 @@ export function createSamplePlayers(sounds, kit) {
   return samplePlayers;
 }
 
-export function create(tracks, beatNotifier, transportPositionNotifier, samplePlayers, kit) {
+export function create(tracks, beatNotifier, transportPositionNotifier, samplePlayers, kit, sequenceLength) {
   // new Tone.Sequence ( callback , events , subdivision )
+  const resulotion = 16;
+  const beats = resulotion * sequenceLength;
   const loop = new Tone.Sequence(
     loopHandler(tracks, beatNotifier, transportPositionNotifier, samplePlayers, kit),
-    new Array(16).fill(0).map((_, i) => i),
+    new Array(beats).fill(0).map((_, i) => i),
     '16n',
   );
   return loop;
@@ -42,12 +44,16 @@ export function setBPM(bpm) {
 
 function loopHandler(tracks, beatNotifier, transportPositionNotifier, samplePlayers, kit) {
   return (time, index) => {
-    beatNotifier(index);
-    transportPositionNotifier();
+    Tone.Draw.schedule(function(){
+      //this callback is invoked from a requestAnimationFrame
+      //and will be invoked close to AudioContext time
+      transportPositionNotifier();
+      beatNotifier(index);
+    }, time) //use AudioContext time of the event    
     tracks.forEach(({ path, vol, muted, beats, key }) => {
       if (beats.includes(index)) {
         try {
-          // const kit = 'A';
+          // console.log(time);
           // const sampleName = model.getSampleByKey(key, kit);
           // const samplePath = `${model.settings.basePath}${kit}/${sampleName}`;
           // Player.start(startTime, offset, duration)
