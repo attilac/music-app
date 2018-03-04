@@ -19,9 +19,9 @@ class DrumPad extends Component {
 
   componentWillReceiveProps(nextProps) {
     if (nextProps.beats.includes(nextProps.currentBeat)) {
-      this.setState({ active: true });
+      // this.setState({ active: true });
     } else {
-      this.setState({ active: false });
+      // this.setState({ active: false });
     }
   }
 
@@ -80,14 +80,15 @@ class DrumPad extends Component {
   render() {
     const { title } = this.props;
     const { active } = this.state;
-    const activeClass = active ? 'active' : '';
+    const playing = this.props.beats.includes(this.props.currentBeat) ? true : false;
+    const activeClass = active || playing ? 'active' : '';
     return (
       <div className="drumpad-list__item">
         <ReactKeymaster
           keyName={title}
           onKeyDown={this.onKeyDown}
           onKeyUp={this.onKeyUp}
-        />
+        />       
         <button
           onClick={this.onClick}
           className={`pad btn btn-secondary ${activeClass}`}

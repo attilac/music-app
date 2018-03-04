@@ -1,0 +1,24 @@
+.module-playbar {
+  height: 160px;
+ .grid {
+    width: 100%;
+    height: 100%;
+    position: relative;
+    canvas {
+      position: absolute;
+      width: 800px;
+      height: 100%;
+      left: 50%;
+      top: 0; 
+      transform: translate(-50%, 0);    
+    }
+    .playhead {
+      z-index: 21;
+    }
+    .canvas {
+      z-index: 20;
+      border-right: solid 1px #222f3e;
+      border-bottom: solid 1px #222f3e;
+    }
+  }
+}

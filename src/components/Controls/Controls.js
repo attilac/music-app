@@ -79,7 +79,7 @@ class Controls extends Component {
     const activeClickClass = click ? 'btn-secondary active' : 'btn-secondary';
     const clickLabel = click ? 'On' : 'Off';
     return (
-      <div className="module-controls text-center module-controls--bottom module-controls--blue-lighter w-100">
+      <div className="module-controls module-controls--blue-lighter text-center w-100">
         <div className="transport-container">
 
           <div className="transport-position d-flex mr-4">

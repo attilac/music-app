@@ -8,6 +8,7 @@ import firebase from './firebase.js';
 import './App.css';
 import DrumPadList from './components/DrumPadList/DrumPadList';
 import Controls from './components/Controls/Controls';
+import Sequencer from './components/Sequencer/Sequencer';
 
 import * as model from './data/model';
 
@@ -80,10 +81,8 @@ class App extends Component {
   }
 
   componentDidMount() {
-    // const { userId } = this.state;
-    // this.createSequence(this.props.defaultSequence); 0;
-    // this.saveToFirestore('Default Pattern', true);
-    this.loadTrackFromFirestore('iOb0ZkKGaanR578aTpcE');
+    // iOb0ZkKGaanR578aTpcE
+    this.loadTrackFromFirestore('RiRoVGa7FBpS4yDUQ3us');
     // window.addEventListener('beforeunload', this.unsubscribe);
   }
 
@@ -321,12 +320,10 @@ class App extends Component {
   copyBeatsToPatternLength(newBars) {
     const { tracks, bars } = this.state;
     const barsToInsert = newBars - bars;
-    console.log(barsToInsert);
     const tempTracks = [...tracks];
     tempTracks.map(track =>
       track.beats = model.copyBeatsToNewBars(track.beats, 16, barsToInsert)
     );
-
   }
 
   beatNotifier(beat) {
@@ -336,7 +333,6 @@ class App extends Component {
   transportPositionNotifier() {
     const position = Tone.TransportTime().toBarsBeatsSixteenths();
     return position;
-    // console.log(Tone.TransportTime().toBarsBeatsSixteenths());
   }
 
   setTransportBPM(newBpm) {
@@ -420,19 +416,22 @@ class App extends Component {
                 />
               </div>  
             </div>               
-            <div className="main row justify-content-center align-items-center">           
-              { 
-                <DrumPadList
-                  players={players}
-                  samples={tracks}
-                  record={record}
-                  playing={playing}
-                  currentBeat={currentBeat}
-                  toggleTrackBeat={this.toggleTrackBeat}
-                  resetTrack={this.resetTrack}
-                  erase={erase}
-                />
-              }
+            <div className="main row justify-content-center align-items-center">  
+              <Sequencer
+                currentBeat={currentBeat}
+                playing={playing}
+                bars={bars}
+              />        
+              <DrumPadList
+                players={players}
+                samples={tracks}
+                record={record}
+                playing={playing}
+                currentBeat={currentBeat}
+                toggleTrackBeat={this.toggleTrackBeat}
+                resetTrack={this.resetTrack}
+                erase={erase}
+              />
             </div>  
             <div className="row">
               <Controls

@@ -6081,8 +6081,8 @@ a.text-dark:hover, a.text-dark:focus {
     .module-controls .transport-play .icon-play {
       position: absolute;
       top: 50%;
-      left: 55%;
-      transform: translate(-50%, -50%);
+      left: 50%;
+      transform: translate(-30%, -50%);
       width: 19px;
       height: 16px;
       display: inline-block; }
@@ -6149,6 +6149,26 @@ a.text-dark:hover, a.text-dark:focus {
       color: #fff; }
     .module-controls .tempo-controls .click {
       width: 50px; }
+
+.module-playbar {
+  height: 160px; }
+  .module-playbar .grid {
+    width: 100%;
+    height: 100%;
+    position: relative; }
+    .module-playbar .grid canvas {
+      position: absolute;
+      width: 800px;
+      height: 100%;
+      left: 50%;
+      top: 0;
+      transform: translate(-50%, 0); }
+    .module-playbar .grid .playhead {
+      z-index: 21; }
+    .module-playbar .grid .canvas {
+      z-index: 20;
+      border-right: solid 1px #222f3e;
+      border-bottom: solid 1px #222f3e; }
 
 html, body, #root {
   height: 100%; }

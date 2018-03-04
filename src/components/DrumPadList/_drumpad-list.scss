@@ -17,10 +17,8 @@
       
       .btn {
         color: #fff;
-        // background-color: #262f3d;
         border-width: 1px 1px 3px 1px;
         border-color: #404854;
-        // border-bottom-color: darken($body-bg, 2%);
         text-transform: uppercase;
            
         &:hover,
@@ -28,7 +26,6 @@
           color: #fff;
           background-color: #4fc3f7;
           border-color: darken(#4fc3f7, 15%);
-          // border-bottom-color: darken(#4fc3f7, 35%);
           transition: all .15s ease-in;
         }
       }
