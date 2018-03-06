@@ -1,24 +1,33 @@
 .module-playbar {
-  height: 160px;
+  // height: 160px;
+  height: 80%;
  .grid {
     width: 100%;
     height: 100%;
     position: relative;
+    border-top: solid 1px rgba(70, 70, 70, 1);
+    border-bottom: solid 3px rgba(0, 0, 0, 1);
     canvas {
       position: absolute;
-      width: 800px;
-      height: 100%;
-      left: 50%;
+      // width: 800px;
+      // width: 100%;
+      // height: 100%;
+      left: 0;
       top: 0; 
-      transform: translate(-50%, 0);    
+      // transform: translate(-50%, 0); 
     }
-    .playhead {
+    .note-canvas {
+      z-index: 22;
+    }
+
+    .playhead-canvas {
       z-index: 21;
     }
-    .canvas {
+    
+    .grid-canvas {
       z-index: 20;
-      border-right: solid 1px #222f3e;
-      border-bottom: solid 1px #222f3e;
+      // border-left: solid 1px rgba(110, 110, 110, 1);
+      border-right: solid 1px rgba(110, 110, 110, 1);
     }
   }
 }

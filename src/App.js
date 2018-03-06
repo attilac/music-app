@@ -324,6 +324,7 @@ class App extends Component {
     tempTracks.map(track =>
       track.beats = model.copyBeatsToNewBars(track.beats, 16, barsToInsert)
     );
+    this.setState({ tracks: tempTracks });
   }
 
   beatNotifier(beat) {
@@ -408,7 +409,7 @@ class App extends Component {
             <div className="row justify-content-center">
               <div className="">
                 <input 
-                  className="form-control song-title mt-5 text-center"
+                  className="form-control song-title mt-5 mb-3 text-center"
                   type="text"
                   value={songTitle}
                   onChange={this.handleTitleChange}
@@ -416,23 +417,29 @@ class App extends Component {
                 />
               </div>  
             </div>               
-            <div className="main row justify-content-center align-items-center">  
+            <div className="main row justify-content-center align-items-center">
+              <div className="position-absolute w-100 drumpad-drawer">
+                <DrumPadList
+                  players={players}
+                  samples={tracks}
+                  record={record}
+                  playing={playing}
+                  currentBeat={currentBeat}
+                  toggleTrackBeat={this.toggleTrackBeat}
+                  resetTrack={this.resetTrack}
+                  erase={erase}
+                />            
+              </div>
+            {
+              
               <Sequencer
                 currentBeat={currentBeat}
                 playing={playing}
                 bars={bars}
-              />        
-              <DrumPadList
-                players={players}
-                samples={tracks}
-                record={record}
-                playing={playing}
-                currentBeat={currentBeat}
-                toggleTrackBeat={this.toggleTrackBeat}
-                resetTrack={this.resetTrack}
-                erase={erase}
+                tracks={tracks}
               />
-            </div>  
+              }
+            </div> 
             <div className="row">
               <Controls
                 bars={bars}

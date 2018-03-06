@@ -33,6 +33,19 @@ html, body, #root {
 
 .main {
   flex-grow: 1;
+  height: calc(100% - 260px);
+  overflow: hidden;
+  position: relative;
+}
+
+.drumpad-drawer {
+  background-color: #161c24;
+  border-top: solid 1px rgba(255, 255, 255, 0.1);
+  z-index: 1000;
+  padding: 48px 0;
+  bottom: 0px;
+  box-shadow: 0 -5px 10px rgba(0, 0, 0, 0.2);
+  transform: translate(0, 65%);
 }
 
 .module-user {

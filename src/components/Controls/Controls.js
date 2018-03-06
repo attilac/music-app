@@ -82,11 +82,11 @@ class Controls extends Component {
       <div className="module-controls module-controls--blue-lighter text-center w-100">
         <div className="transport-container">
 
-          <div className="transport-position d-flex mr-4">
+          <div className="transport-position d-flex align-items-center mr-4">
             <p className="mb-0">{ transportPosition }</p>
           </div>   
 
-          <div className="transport-controls d-flex mr-4">
+          <div className="transport-controls d-flex align-items-center mr-4">
             <button
               onClick={stopTransport}
               className="btn btn-round mr-2 btn-secondary transport-stop"
@@ -129,7 +129,7 @@ class Controls extends Component {
             </div>                                   
           </div>
 
-          <div className="tempo-controls d-flex flex-row mr-4">
+          <div className="tempo-controls d-flex flex-row align-items-center mr-4">
             <div className="tempo-wrapper mr-2">
               <input 
                 type="number" 
@@ -155,7 +155,7 @@ class Controls extends Component {
           </div>
           <div className="track-actions">
             <button
-              className="btn btn-secondary text-uppercase d-block save-track"
+              className="btn btn-sm btn-secondary text-uppercase d-block save-track"
               onClick={saveTrack}
               title="Save Track"
               >
