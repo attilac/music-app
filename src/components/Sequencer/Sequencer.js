@@ -10,8 +10,9 @@ class Sequencer extends Component {
     this.state = {
       bars: this.props.bars,
       tracks: this.props.tracks,
-      width: 1280,
-      height: 400,
+      width: 0,
+      height: 0,
+      notes: [],
     };
     this.onResize = this.onResize.bind(this);
   }
@@ -25,7 +26,7 @@ class Sequencer extends Component {
     this.noteContext = this.noteCanvas.getContext('2d');
     this.updatePlayheadCanvas();
     this.drawBgGrid(this.props.bars);
-    // this.drawNotes(this.props.tracks, this.props.bars);
+    this.drawNotes(this.props.tracks, this.props.bars);
   }
 
   componentWillReceiveProps(nextProps) {
@@ -54,8 +55,7 @@ class Sequencer extends Component {
         height: this.noteCanvas.height,
       });      
       this.drawNotes(nextProps.tracks, nextProps.bars);
-    }
-    
+    }  
   }
 
   componentDidUpdate() {
@@ -64,7 +64,7 @@ class Sequencer extends Component {
 
   onResize = (width, height) => {
     // console.log(width, height);
-    this.setState({width: width, height: height});
+    this.setState({ width: Math.floor(width * 2), height: Math.floor(height * 2) });
     this.drawBgGrid(this.props.bars);
     this.drawNotes(this.props.tracks, this.props.bars);
   }
@@ -114,16 +114,13 @@ class Sequencer extends Component {
     const stepHeight = gridHeight / this.props.tracks.length;   
     const stepWidth = gridWidth / steps;
     this.bgContext.lineWidth = 1;
-    for (let x = 0; x < gridWidth; x++) {
-		  for (let y = 0; y < gridHeight; y++) {
-        //draw tile with border 
+
+    for (let x = 0; x < steps; x++) {
+      for (let y = 0; y < this.state.tracks.length; y++) {
         this.bgContext.beginPath();
         this.bgContext.strokeStyle = 'rgba(12, 12, 12, .5)';
         this.bgContext.strokeRect((x * stepWidth) + 0.50, (y * stepHeight) + 0.50, stepWidth, stepHeight);
-        // this.bgContext.font = '12px Open Sans';
-        // this.bgContext.fillText(x + 1, x * stepWidth, 12);
-
-        // Quarter Notes
+        // Quarter Note Lines 
         if (x % 4 === 0 && x > 0) {
           canvas.drawLines({
             ctx: this.bgContext, 
@@ -134,7 +131,7 @@ class Sequencer extends Component {
             strokeStyle: 'rgba(58, 58, 58, 1)',
           });   
         }
-        // Bars
+        // Bar Lines
         if (x % 16 === 0) {
           canvas.drawLines({
             ctx: this.bgContext, 
@@ -144,24 +141,24 @@ class Sequencer extends Component {
             height: gridHeight, 
             strokeStyle:  'rgba(110, 110, 110, 1)',
           });                        
-        }  
-      }     
+        } 
+      }
     }
   }
 
   drawNotes(tracks, bars) {
-    console.log(bars);
+    // console.log(bars);
     const steps = bars * 16;
     const tileMargin = 4.5;
 		const gridWidth = this.noteCanvas.width;
     const gridHeight = this.noteCanvas.height;
     const stepHeight = gridHeight / tracks.length;   
     const stepWidth = gridWidth / steps;
-
-    tracks.forEach((track, index) => {
+    const notes = [];
+    tracks.map((track, index) => {
       // console.log(track.beats);
       if (track.beats.length) {
-        track.beats.forEach((beat) => {
+        track.beats.map((beat) => {
           let x = beat * stepWidth;
           canvas.drawTile({
             ctx: this.noteContext, 
@@ -174,39 +171,68 @@ class Sequencer extends Component {
             margin: tileMargin, 
             fillStyle: 'rgba(79, 195, 247, .7)',
           });
+          notes.push({
+            'x': Math.round((beat * stepWidth) + tileMargin + 1.5) / 2, 
+            'y': Math.round((index * stepHeight) + tileMargin + 0.5) / 2,
+            'width': stepWidth / 2,
+            'height': stepHeight / 2,
+            'track': index,
+            'beat': beat,
+          })
         });
       } 
     });
-
+    this.setState({ notes: notes });
   }
+
+  isIntersect(point, rect) {
+    return (point.x >= rect.x && point.x <= rect.x + rect.width);
+      // && (point.y >= rect.y && point.y <= rect.y + rect.height);
+  }
+
+  handleCanvasClick = (e) => {
+    const offset = e.target.getBoundingClientRect();
+    const mousePoint = {
+      x: e.clientX - offset.x,
+      y: e.clientY - offset.y
+    };
+    this.state.notes.forEach(note => {
+      if(mousePoint.x >= note.x && mousePoint.x <= (note.x + note.width) && mousePoint.y >= note.y && mousePoint.y <= (note.y + note.height)) {
+        console.log('Det finns en not här');
+        console.log(note);
+      }
+    });
+    //console.log(this.state.notes);
+  } 
 
   render() {
     const { width, height } = this.state;
     return (
-      <div className="module module-playbar w-100 text-center">
+      <div className="module module-sequencer w-100 text-center">
         <ReactResizeDetector handleWidth handleHeight onResize={this.onResize} />
         <div className="grid">
-        <canvas 
-              ref="noteCanvas"
-              className="note-canvas" 
-              width={width} 
-              height={height} 
-            >
-            </canvas>        
+          <canvas
+            ref="noteCanvas"
+            className="note-canvas" 
+            width={width}
+            height={height}
+            onClick={this.handleCanvasClick}
+          >
+          </canvas>        
           <canvas 
-              ref="playheadCanvas"
-              className="playhead-canvas" 
-              width={width} 
-              height={height}
-            >  
-            </canvas>        
-            <canvas 
-              ref="bgCanvas"
-              className="grid-canvas" 
-              width={width} 
-              height={height} 
-            >
-            </canvas>
+            ref="playheadCanvas"
+            className="playhead-canvas" 
+            width={width} 
+            height={height}
+          >  
+          </canvas>        
+          <canvas 
+            ref="bgCanvas"
+            className="grid-canvas" 
+            width={width} 
+            height={height} 
+          >
+          </canvas>
         </div>     
       </div>
     );
