@@ -18,11 +18,6 @@ class DrumPad extends Component {
   }
 
   componentWillReceiveProps(nextProps) {
-    if (nextProps.beats.includes(nextProps.currentBeat)) {
-      // this.setState({ active: true });
-    } else {
-      // this.setState({ active: false });
-    }
   }
 
   onClick(e) {
@@ -32,15 +27,30 @@ class DrumPad extends Component {
   }
 
   onKeyDown(keyName) {
-    const { title, erase } = this.props;
+    const { title, erase, record } = this.props;
     if (keyName === title) {
       // console.log(`${sample} was pressed`);
+      switch (true) {
+        case erase:
+          this.resetTrack();
+          break;
+        case record:
+          this.playSound();
+          this.recordIt();
+          break;
+        default:
+          this.playSound();
+          break;
+      }
+      this.props.setCurrentTrack(title);
       this.setState({ active: !this.state.active });
+      /*
       if (erase) {
         this.resetTrack();
       } else {
         this.playSound();
       }
+      */
     }
   }
 
@@ -54,18 +64,17 @@ class DrumPad extends Component {
   resetTrack() {
     const { trackId, resetTrack } = this.props;
     resetTrack(trackId);
-    console.log('Erasing track');
+    // const { trackId, eraseEventFromTrack, currentBeat } = this.props;
+    // eraseEventFromTrack(trackId, currentBeat);
+    // console.log('Erasing beat from track ', currentBeat);
   }
 
   playSound() {
-    const { record, sample, players, playing } = this.props;
+    const { sample, players, playing } = this.props;
     players.get(sample).volume.value = -6;
     if (playing) {
-      // players.get(sample).start(Tone.Transport.nextSubdivision('16n'), 0, '1n');
+      // players.get(sample).start('@16n', 0, '1n');
       players.get(sample).start(AudioContext.currentTime, 0, '1n');
-      if (record) {
-        this.recordIt();
-      }
     } else {
       players.get(sample).start(AudioContext.currentTime, 0, '1n');
     }
@@ -91,7 +100,7 @@ class DrumPad extends Component {
         />       
         <button
           onClick={this.onClick}
-          className={`pad btn btn-secondary ${activeClass}`}
+          className={`pad btn btn-secondary ${activeClass}`} 
         >
           { title }
         </button>

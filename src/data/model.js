@@ -123,6 +123,23 @@ export function resetTrack(tracks, id) {
   });
 }
 
+export function eraseEventFromTrack(tracks, id, beat) {
+  return tracks.map((track) => {
+    if (track.id !== id) {
+      return track;
+    }
+    // console.log(beat);
+    return { ...track, beats: removeBeat(track.beats, beat) };
+  });
+}
+
+function removeBeat(beats, beat) {
+  let newBeats = [...beats];
+  return newBeats.filter(item =>
+    item !== beat
+  );
+}
+
 function beatReplacer(beats, beat) {
   let newBeats = [...beats];
   if (!beats.includes(beat)) {

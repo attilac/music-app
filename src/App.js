@@ -23,6 +23,7 @@ class App extends Component {
       playing: false,
       record: false,
       currentBeat: -1,
+      currentTrack: null,
       bpm: 120,
       samples: this.props.samples,
       kit: this.props.kit,
@@ -63,7 +64,9 @@ class App extends Component {
     this.transportPositionNotifier = this.transportPositionNotifier.bind(this);
     this.beatNotifier = this.beatNotifier.bind(this);
     this.toggleTrackBeat = this.toggleTrackBeat.bind(this);
+    this.eraseEventFromTrack = this.eraseEventFromTrack.bind(this);
     this.resetTrack = this.resetTrack.bind(this);
+    this.setCurrentTrack = this.setCurrentTrack.bind(this);
     this.toggleClick = this.toggleClick.bind(this);
     this.toggleEraseMode = this.toggleEraseMode.bind(this);
     this.toggleRecord = this.toggleRecord.bind(this);
@@ -295,6 +298,18 @@ class App extends Component {
     this.updateSequence(model.resetTrack(tracks, trackId));
   }
 
+  eraseEventFromTrack(trackId, beat) {
+    const { tracks } = this.state;
+    this.updateSequence(model.eraseEventFromTrack(tracks, trackId, beat));
+  }
+
+  setCurrentTrack(trackId) {
+    const { currentTrack } = this.state;
+    if( currentTrack !== trackId ) {
+      this.setState({ currentTrack: trackId });
+    }
+  }
+
   setPatternLength(bars) {
     if (bars >= this.state.bars) {
       this.copyBeatsToPatternLength(bars);
@@ -389,7 +404,8 @@ class App extends Component {
     const { 
       bars,
       click, 
-      currentBeat, 
+      currentBeat,
+      currentTrack,
       tracks, 
       record, 
       playing, 
@@ -426,6 +442,8 @@ class App extends Component {
                   playing={playing}
                   currentBeat={currentBeat}
                   toggleTrackBeat={this.toggleTrackBeat}
+                  setCurrentTrack={this.setCurrentTrack}                  
+                  eraseEventFromTrack={this.eraseEventFromTrack}
                   resetTrack={this.resetTrack}
                   erase={erase}
                 />            
@@ -434,6 +452,7 @@ class App extends Component {
               
               <Sequencer
                 currentBeat={currentBeat}
+                currentTrack={currentTrack}
                 playing={playing}
                 bars={bars}
                 tracks={tracks}

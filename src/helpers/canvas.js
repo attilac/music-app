@@ -15,7 +15,7 @@ export function clearCanvas(props) {
 
 export function drawTile(props) {
   const { ctx, x ,y, offsetX, offsetY, width, height, margin, fillStyle } = props;
-  ctx.fillStyle = 'rgba(79, 195, 247, .7)';
+  ctx.fillStyle = fillStyle;
   ctx.beginPath();
   ctx.fillRect((x * width) + margin + offsetX, (y * height) + margin + offsetY, width - ( margin * 2 ), height - ( margin * 2 ));  
 }

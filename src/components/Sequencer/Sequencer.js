@@ -24,6 +24,8 @@ class Sequencer extends Component {
     this.playheadContext = this.playheadCanvas.getContext('2d');
     this.noteCanvas = this.refs.noteCanvas;
     this.noteContext = this.noteCanvas.getContext('2d');
+    this.trackCanvas = this.refs.trackCanvas;
+    this.trackContext = this.trackCanvas.getContext('2d');
     this.updatePlayheadCanvas();
     this.drawBgGrid(this.props.bars);
     this.drawNotes(this.props.tracks, this.props.bars);
@@ -55,11 +57,12 @@ class Sequencer extends Component {
         height: this.noteCanvas.height,
       });      
       this.drawNotes(nextProps.tracks, nextProps.bars);
-    }  
+    }
   }
 
   componentDidUpdate() {
     this.updatePlayheadCanvas();
+    this.updateTrackCanvas();
   }
 
   onResize = (width, height) => {
@@ -67,6 +70,7 @@ class Sequencer extends Component {
     this.setState({ width: Math.floor(width * 2), height: Math.floor(height * 2) });
     this.drawBgGrid(this.props.bars);
     this.drawNotes(this.props.tracks, this.props.bars);
+    this.updateTrackCanvas();
   }
 
 	getX(beat) {
@@ -76,9 +80,38 @@ class Sequencer extends Component {
 		return (currentBeat / beatsTotal) * this.playheadCanvas.width;
   }
   
-	getY(pos) {
-    const { currentBeat } = this.props;
-		return this.playheadCanvas.height/(currentBeat) * (pos + 1);
+	getCurrentTrackIndex(pos) {
+    const { currentTrack, tracks } = this.props;
+    const currentTrackNames = tracks.map(track =>
+      track.key
+    );
+    return currentTrackNames.indexOf(currentTrack);	
+  }
+
+  drawSelectedTrack() {
+    const { tracks, currentTrack } = this.props;
+    const gridWidth = this.trackCanvas.width;
+    const stepHeight = this.trackCanvas.height / tracks.length;
+    const currentTrackNames = tracks.map(track =>
+      track.key
+    );
+    if(this.getCurrentTrackIndex() !== -1) {
+      const y = (this.getCurrentTrackIndex() * stepHeight) + 0.5; 
+      this.trackContext.beginPath();
+      this.trackContext.fillStyle = 'rgba(79, 195, 247, .2)';
+      this.trackContext.fillRect( 0.5, y, gridWidth, stepHeight);
+    }
+  }
+
+  updateTrackCanvas() {
+    canvas.clearCanvas({
+      ctx: this.trackContext,
+      x: 0,
+      y: 0,
+      width: this.trackCanvas.width,
+      height: this.trackCanvas.height,
+    });    
+    this.drawSelectedTrack();
   }
 
   drawPlayhead() {
@@ -161,7 +194,7 @@ class Sequencer extends Component {
         track.beats.map((beat) => {
           let x = beat * stepWidth;
           canvas.drawTile({
-            ctx: this.noteContext, 
+            ctx: this.noteContext,
             x: beat,
             y: index, 
             offsetX: 1.5, 
@@ -185,9 +218,11 @@ class Sequencer extends Component {
     this.setState({ notes: notes });
   }
 
-  isIntersect(point, rect) {
-    return (point.x >= rect.x && point.x <= rect.x + rect.width);
-      // && (point.y >= rect.y && point.y <= rect.y + rect.height);
+  isIntersect(mousePoint, note) {
+    return mousePoint.x >= note.x && 
+      mousePoint.x <= (note.x + note.width) && 
+      mousePoint.y >= note.y && 
+      mousePoint.y <= (note.y + note.height);
   }
 
   handleCanvasClick = (e) => {
@@ -197,12 +232,11 @@ class Sequencer extends Component {
       y: e.clientY - offset.y
     };
     this.state.notes.forEach(note => {
-      if(mousePoint.x >= note.x && mousePoint.x <= (note.x + note.width) && mousePoint.y >= note.y && mousePoint.y <= (note.y + note.height)) {
+      if(this.isIntersect(mousePoint, note)) {
         console.log('Det finns en not här');
         console.log(note);
       }
     });
-    //console.log(this.state.notes);
   } 
 
   render() {
@@ -225,7 +259,14 @@ class Sequencer extends Component {
             width={width} 
             height={height}
           >  
-          </canvas>        
+          </canvas>
+          <canvas 
+            ref="trackCanvas"
+            className="track-canvas" 
+            width={width} 
+            height={height} 
+          >
+          </canvas>       
           <canvas 
             ref="bgCanvas"
             className="grid-canvas" 
