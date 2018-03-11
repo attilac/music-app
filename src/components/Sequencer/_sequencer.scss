@@ -1,5 +1,6 @@
 .module-sequencer {
   height: 80%;
+  // background-color: darken(rgba(22, 28, 36, 1), 5%);
  .grid {
     width: 100%;
     height: 100%;
@@ -13,14 +14,15 @@
       left: 0;
       top: 0;
     }
-    .note-canvas {
+    .track-canvas {
       z-index: 22;
     }
-
+    .note-canvas {
+      z-index: 23;
+    }
     .playhead-canvas {
       z-index: 21;
     }
-    
     .grid-canvas {
       z-index: 20;
       // border-left: solid 1px rgba(110, 110, 110, 1);

@@ -23,8 +23,8 @@ export function createSamplePlayers(sounds, kit) {
 
 export function create(tracks, beatNotifier, transportPositionNotifier, samplePlayers, kit, sequenceLength) {
   // new Tone.Sequence ( callback , events , subdivision )
-  const resulotion = 16;
-  const beats = resulotion * sequenceLength;
+  const resolution = 16;
+  const beats = resolution * sequenceLength;
   const loop = new Tone.Sequence(
     loopHandler(tracks, beatNotifier, transportPositionNotifier, samplePlayers, kit),
     new Array(beats).fill(0).map((_, i) => i),
@@ -44,7 +44,7 @@ export function setBPM(bpm) {
 
 function loopHandler(tracks, beatNotifier, transportPositionNotifier, samplePlayers, kit) {
   return (time, index) => {
-    Tone.Draw.schedule(function(){
+    Tone.Draw.schedule(function() {
       //this callback is invoked from a requestAnimationFrame
       //and will be invoked close to AudioContext time
       transportPositionNotifier();

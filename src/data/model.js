@@ -110,7 +110,17 @@ export function toggleTrackBeat(tracks, id, beat) {
       return track;
     }
     // console.log(beat);
-    return { ...track, beats: beatReplacer(track.beats, beat) };
+    return { ...track, beats: insertBeat(track.beats, beat) };
+  });
+}
+
+export function toggleSequenceBeat(tracks, id, beat) {
+  return tracks.map((track) => {
+    if (track.id !== id) {
+      return track;
+    }
+    // console.log(beat);
+    return { ...track, beats: toggleBeat(track.beats, beat) };  
   });
 }
 
@@ -133,19 +143,29 @@ export function eraseEventFromTrack(tracks, id, beat) {
   });
 }
 
-function removeBeat(beats, beat) {
+function toggleBeat(beats, beat) {
   let newBeats = [...beats];
-  return newBeats.filter(item =>
-    item !== beat
-  );
+  if (!beats.includes(beat)) {
+    newBeats = [...beats, beat];
+  } else {
+    newBeats = removeBeat(beats, beat);
+  }
+  return newBeats;
 }
 
-function beatReplacer(beats, beat) {
+function insertBeat(beats, beat) {
   let newBeats = [...beats];
   if (!beats.includes(beat)) {
     newBeats = [...beats, beat];
   }
   return newBeats;
+}
+
+function removeBeat(beats, beat) {
+  let newBeats = [...beats];
+  return newBeats.filter(item =>
+    item !== beat
+  );
 }
 
 export function copyBeatsToNewBars(beats, resolution, bars) {
@@ -162,7 +182,6 @@ export function copyBeatsToNewBars(beats, resolution, bars) {
 
 export function trimBeatsFromBars(beats, resolution, bars) {
   const beatLength = bars * resolution;
-  // console.log(beats);
   return beats.filter(beat =>
     beat < beatLength
   );

@@ -64,6 +64,7 @@ class App extends Component {
     this.transportPositionNotifier = this.transportPositionNotifier.bind(this);
     this.beatNotifier = this.beatNotifier.bind(this);
     this.toggleTrackBeat = this.toggleTrackBeat.bind(this);
+    this.toggleSequenceBeat = this.toggleSequenceBeat.bind(this);
     this.eraseEventFromTrack = this.eraseEventFromTrack.bind(this);
     this.resetTrack = this.resetTrack.bind(this);
     this.setCurrentTrack = this.setCurrentTrack.bind(this);
@@ -267,7 +268,7 @@ class App extends Component {
       this.transportPositionNotifier, 
       players, 
       kit,
-      bars
+      4
     );    
     this.sequence.start();
     this.setTransportBPM(bpm);
@@ -291,6 +292,12 @@ class App extends Component {
   toggleTrackBeat(trackId) {
     const { tracks, currentBeat, userId } = this.state;
     this.updateSequence(model.toggleTrackBeat(tracks, trackId, currentBeat));
+  }
+
+  toggleSequenceBeat(trackId, beat) {
+    const { tracks } = this.state;
+    // console.log(trackId, beat);
+    this.updateSequence(model.toggleSequenceBeat(tracks, trackId, beat));
   }
 
   resetTrack(trackId) {
@@ -319,11 +326,11 @@ class App extends Component {
     }
     this.setState({ bars: bars });
     Tone.Transport.setLoopPoints(0, `${bars}m`);
-    // console.log(bars); 
+    // console.log(this.sequence.length);
   }
 
   trimBeatsToPatternLength(newBars) {
-    const { tracks, bars } = this.state;
+    const { tracks } = this.state;
     const tempTracks = [...tracks];
     tempTracks.map(track =>
       track.beats = model.trimBeatsFromBars(track.beats, 16, newBars)
@@ -336,9 +343,12 @@ class App extends Component {
     const { tracks, bars } = this.state;
     const barsToInsert = newBars - bars;
     const tempTracks = [...tracks];
-    tempTracks.map(track =>
-      track.beats = model.copyBeatsToNewBars(track.beats, 16, barsToInsert)
-    );
+    for (let index = 0; index < barsToInsert; index++) {
+      tempTracks.map(track =>
+        track.beats = model.copyBeatsToNewBars(track.beats, 16, barsToInsert)
+      );     
+    }
+    // console.log(this.sequence.length);
     this.setState({ tracks: tempTracks });
   }
 
@@ -363,8 +373,8 @@ class App extends Component {
   }
 
   stopTransport() {
-    Tone.Transport.stop();
-    this.setState({ currentBeat: -1, playing: false, record: false });
+    Tone.Transport.pause();
+    this.setState({ /*currentBeat: -1,*/ playing: false, record: false });
     // this.updateTrackInFirestore();
   }
 
@@ -451,11 +461,13 @@ class App extends Component {
             {
               
               <Sequencer
+                players={players}
                 currentBeat={currentBeat}
                 currentTrack={currentTrack}
                 playing={playing}
                 bars={bars}
                 tracks={tracks}
+                toggleSequenceBeat={this.toggleSequenceBeat}
               />
               }
             </div> 

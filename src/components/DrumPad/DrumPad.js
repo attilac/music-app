@@ -21,15 +21,25 @@ class DrumPad extends Component {
   }
 
   onClick(e) {
-    const { sample } = this.props;
-    console.log(`${sample} was pressed`);
-    this.playSound();
+    const { title, erase, record } = this.props;
+    switch (true) {
+      case erase:
+        this.resetTrack();
+        break;
+      case record:
+        this.playSound();
+        this.recordIt();
+        break;
+      default:
+        this.playSound();
+        break;
+    }
+    this.props.setCurrentTrack(title);
   }
 
   onKeyDown(keyName) {
     const { title, erase, record } = this.props;
     if (keyName === title) {
-      // console.log(`${sample} was pressed`);
       switch (true) {
         case erase:
           this.resetTrack();
@@ -44,13 +54,6 @@ class DrumPad extends Component {
       }
       this.props.setCurrentTrack(title);
       this.setState({ active: !this.state.active });
-      /*
-      if (erase) {
-        this.resetTrack();
-      } else {
-        this.playSound();
-      }
-      */
     }
   }
 

@@ -9,7 +9,6 @@ class Sequencer extends Component {
     super(props);
     this.state = {
       bars: this.props.bars,
-      tracks: this.props.tracks,
       width: 0,
       height: 0,
       notes: [],
@@ -48,7 +47,6 @@ class Sequencer extends Component {
     }
     
     if (nextProps.tracks !== this.props.tracks) {
-      // console.log('tracks', nextProps.tracks);
       canvas.clearCanvas({
         ctx: this.noteContext,
         x: 0,
@@ -76,8 +74,8 @@ class Sequencer extends Component {
 	getX(beat) {
     const { currentBeat } = this.props;
     const { bars } = this.state;
-    const beatsTotal = bars * 16;
-		return (currentBeat / beatsTotal) * this.playheadCanvas.width;
+    const steps = bars * 16;
+    return (currentBeat / steps) * this.playheadCanvas.width;
   }
   
 	getCurrentTrackIndex(pos) {
@@ -89,17 +87,19 @@ class Sequencer extends Component {
   }
 
   drawSelectedTrack() {
-    const { tracks, currentTrack } = this.props;
+    const { tracks } = this.props;
+    const { bars } = this.state;
+    const steps = bars * 16;
     const gridWidth = this.trackCanvas.width;
+    const stepWidth = gridWidth / steps;
     const stepHeight = this.trackCanvas.height / tracks.length;
-    const currentTrackNames = tracks.map(track =>
-      track.key
-    );
     if(this.getCurrentTrackIndex() !== -1) {
-      const y = (this.getCurrentTrackIndex() * stepHeight) + 0.5; 
-      this.trackContext.beginPath();
-      this.trackContext.fillStyle = 'rgba(79, 195, 247, .2)';
-      this.trackContext.fillRect( 0.5, y, gridWidth, stepHeight);
+      const y = (this.getCurrentTrackIndex() * stepHeight) + 0.5;
+      for (let x = 0; x < steps; x++) {
+        this.trackContext.beginPath();
+        this.trackContext.fillStyle = 'rgba(79, 195, 247, .2)';
+        this.trackContext.fillRect((x * stepWidth) + 0.50, y + 0.5, stepWidth - 1.5, stepHeight - 1.5);
+      }
     }
   }
 
@@ -126,7 +126,7 @@ class Sequencer extends Component {
       width: stepWidth, 
       height: this.playheadCanvas.height, 
       strokeStyle: 'rgba(255, 255, 255, .3)',
-    });      
+    });  
   }
 
   updatePlayheadCanvas() {
@@ -141,6 +141,7 @@ class Sequencer extends Component {
   }
 
   drawBgGrid(bars) {
+    const { tracks } = this.props;
     const steps = bars * 16;
 		const gridWidth = this.bgCanvas.width;
     const gridHeight = this.bgCanvas.height;
@@ -149,10 +150,22 @@ class Sequencer extends Component {
     this.bgContext.lineWidth = 1;
 
     for (let x = 0; x < steps; x++) {
-      for (let y = 0; y < this.state.tracks.length; y++) {
+      for (let y = 0; y < tracks.length; y++) {
         this.bgContext.beginPath();
-        this.bgContext.strokeStyle = 'rgba(12, 12, 12, .5)';
+        this.bgContext.strokeStyle = 'rgba(50, 50, 50, .5)';
         this.bgContext.strokeRect((x * stepWidth) + 0.50, (y * stepHeight) + 0.50, stepWidth, stepHeight);
+        // Zebra
+        /*  
+        if (y % 2 === 0) {
+          this.bgContext.beginPath();
+          this.bgContext.fillStyle = 'rgba(38, 38, 38, 1)';	
+          this.bgContext.fillRect((x * stepWidth) + 0.50, (y * stepHeight) + 1.5, stepWidth - 1.5, stepHeight - 1.5);     
+        } else {
+          this.bgContext.beginPath();
+          this.bgContext.fillStyle = 'rgba(18, 18, 18, 1)';
+          this.bgContext.fillRect((x * stepWidth) + 0.50, (y * stepHeight) + 1.5, stepWidth - 1.5, stepHeight - 1.5);         
+        }
+        */
         // Quarter Note Lines 
         if (x % 4 === 0 && x > 0) {
           canvas.drawLines({
@@ -161,7 +174,7 @@ class Sequencer extends Component {
             y: 0.50, 
             witdh: 1, 
             height: gridHeight, 
-            strokeStyle: 'rgba(58, 58, 58, 1)',
+            strokeStyle: 'rgba(78, 78, 78, 1)',
           });   
         }
         // Bar Lines
@@ -192,12 +205,11 @@ class Sequencer extends Component {
       // console.log(track.beats);
       if (track.beats.length) {
         track.beats.map((beat) => {
-          let x = beat * stepWidth;
           canvas.drawTile({
             ctx: this.noteContext,
             x: beat,
             y: index, 
-            offsetX: 1.5, 
+            offsetX: 0.5, 
             offsetY: 0.5, 
             width: stepWidth, 
             height: stepHeight, 
@@ -218,7 +230,7 @@ class Sequencer extends Component {
     this.setState({ notes: notes });
   }
 
-  isIntersect(mousePoint, note) {
+  noteAtPosition(mousePoint, note) {
     return mousePoint.x >= note.x && 
       mousePoint.x <= (note.x + note.width) && 
       mousePoint.y >= note.y && 
@@ -226,17 +238,29 @@ class Sequencer extends Component {
   }
 
   handleCanvasClick = (e) => {
+    const { bars, notes } = this.state;
+    const { toggleSequenceBeat, tracks, players } = this.props;
     const offset = e.target.getBoundingClientRect();
     const mousePoint = {
       x: e.clientX - offset.x,
       y: e.clientY - offset.y
     };
-    this.state.notes.forEach(note => {
-      if(this.isIntersect(mousePoint, note)) {
-        console.log('Det finns en not här');
-        console.log(note);
+    const steps = bars * 16;
+    const stepHeight = (this.bgCanvas.height / 2)  / tracks.length;   
+    const stepWidth = (this.bgCanvas.width / 2) / steps;
+    const track = Math.floor(mousePoint.y / stepHeight);
+    const beat = Math.floor(mousePoint.x / stepWidth);
+    /*
+    notes.forEach(note => {
+      if (this.noteAtPosition(mousePoint, note)) {
+        // console.log('Det finns en not här');
+        // console.log(note);
+        //toggleSequenceBeat(note.track, note.beat);
       }
     });
+    */
+    players.get(tracks[track].path).start(AudioContext.currentTime, 0, '1n');
+    toggleSequenceBeat(track, beat);
   } 
 
   render() {
