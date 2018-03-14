@@ -12,6 +12,7 @@
     "pubnub-react": "^1.2.0",
     "react": "^16.2.0",
     "react-dom": "^16.2.0",
+    "react-draggable": "^3.0.5",
     "react-keymaster": "^0.3.1",
     "react-resize-detector": "^2.1.0",
     "react-scripts": "1.1.0",

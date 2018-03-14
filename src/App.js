@@ -33,9 +33,9 @@ class App extends Component {
       tracks: this.props.defaultSequence,
       users: [this.props.user.userName],
       userId: this.props.user.userName,
+      keysOpen: true,
     };
     // pubnub
-    /*
     let uuid = this.state.userId;
     this.pubnub = new PubNubReact({
       publishKey: 'pub-c-08a9d77b-56c3-4db2-9328-38a797ff3150',
@@ -44,7 +44,6 @@ class App extends Component {
       presenceTimeout: 130,
     });
     this.pubnub.init(this);
-    */
     this.publishTrack = this.publishTrack.bind(this);
     this.addListeners = this.addListeners.bind(this);
     this.getUsers = this.getUsers.bind(this);
@@ -74,24 +73,23 @@ class App extends Component {
 
     this.handleTitleChange = this.handleTitleChange.bind(this);
     this.handleTitleKeyPress = this.handleTitleKeyPress.bind(this);
+    this.toggleCollapse = this.toggleCollapse.bind(this);
   }
 
   componentWillMount() {
-    /*
     this.pubnub.clean('tracks');
     this.subscribeTo();   
     this.addListeners(); 
-    */
   }
 
   componentDidMount() {
     // iOb0ZkKGaanR578aTpcE
     this.loadTrackFromFirestore('RiRoVGa7FBpS4yDUQ3us');
-    // window.addEventListener('beforeunload', this.unsubscribe);
+    window.addEventListener('beforeunload', this.unsubscribe);
   }
 
   componentWillUnmount() {
-    // this.unsubscribe();
+    this.unsubscribe();
   }
 
   loadTrackFromFirestore(trackId) {
@@ -286,7 +284,7 @@ class App extends Component {
     this.sequence = sequencer
       .update(this.sequence, newTracks, this.beatNotifier, this.transportPositionNotifier, players, kit);
     this.setState({ tracks: newTracks });
-    // this.publishTrack('riff', newTracks);
+    this.publishTrack('riff', newTracks);
   }
 
   toggleTrackBeat(trackId) {
@@ -296,7 +294,6 @@ class App extends Component {
 
   toggleSequenceBeat(trackId, beat) {
     const { tracks } = this.state;
-    // console.log(trackId, beat);
     this.updateSequence(model.toggleSequenceBeat(tracks, trackId, beat));
   }
 
@@ -326,7 +323,6 @@ class App extends Component {
     }
     this.setState({ bars: bars });
     Tone.Transport.setLoopPoints(0, `${bars}m`);
-    // console.log(this.sequence.length);
   }
 
   trimBeatsToPatternLength(newBars) {
@@ -335,7 +331,6 @@ class App extends Component {
     tempTracks.map(track =>
       track.beats = model.trimBeatsFromBars(track.beats, 16, newBars)
     );
-    // console.log(temptracks);
     this.setState({ tracks: tempTracks });  
   }
 
@@ -348,7 +343,6 @@ class App extends Component {
         track.beats = model.copyBeatsToNewBars(track.beats, 16, barsToInsert)
       );     
     }
-    // console.log(this.sequence.length);
     this.setState({ tracks: tempTracks });
   }
 
@@ -374,7 +368,7 @@ class App extends Component {
 
   stopTransport() {
     Tone.Transport.pause();
-    this.setState({ /*currentBeat: -1,*/ playing: false, record: false });
+    this.setState({ playing: false, record: false });
     // this.updateTrackInFirestore();
   }
 
@@ -410,6 +404,11 @@ class App extends Component {
     }
   }
 
+  toggleCollapse() {
+    const { keysOpen } = this.state;
+    this.setState({ keysOpen: !keysOpen });
+  }
+
   render() {
     const { 
       bars,
@@ -421,9 +420,12 @@ class App extends Component {
       playing, 
       erase,
       songTitle, 
-      bpm 
+      bpm,
+      keysOpen,
     } = this.state;
     const { players } = this.props;
+    const collapseClass = keysOpen ? 'open' : 'collapsed';
+    const chevronClass = keysOpen ? 'down' : 'up';
     return (
       <div className="app container-fluid h-100">      
         <div className="module-user p-absolute p-3">
@@ -444,7 +446,14 @@ class App extends Component {
               </div>  
             </div>               
             <div className="main row justify-content-center align-items-center">
-              <div className="position-absolute w-100 drumpad-drawer">
+              <div className={`position-absolute w-100 drumpad-drawer ${collapseClass}`}>
+                <button 
+                  className="collapse-btn btn btn-sm btn-secondary"
+                  onClick={this.toggleCollapse}
+                  title="Show Keys"
+                >
+                  <i className={`chevron ${chevronClass}`} />
+                </button>
                 <DrumPadList
                   players={players}
                   samples={tracks}
@@ -456,10 +465,8 @@ class App extends Component {
                   eraseEventFromTrack={this.eraseEventFromTrack}
                   resetTrack={this.resetTrack}
                   erase={erase}
-                />            
-              </div>
-            {
-              
+                />                                  
+              </div>            
               <Sequencer
                 players={players}
                 currentBeat={currentBeat}
@@ -469,9 +476,8 @@ class App extends Component {
                 tracks={tracks}
                 toggleSequenceBeat={this.toggleSequenceBeat}
               />
-              }
             </div> 
-            <div className="row">
+            <div className="row">          
               <Controls
                 bars={bars}
                 click={click}
