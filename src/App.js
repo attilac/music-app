@@ -35,6 +35,7 @@ class App extends Component {
       userId: this.props.user.userName,
       keysOpen: true,
     };
+
     // pubnub
     let uuid = this.state.userId;
     this.pubnub = new PubNubReact({
@@ -44,6 +45,7 @@ class App extends Component {
       presenceTimeout: 130,
     });
     this.pubnub.init(this);
+ 
     this.publishTrack = this.publishTrack.bind(this);
     this.addListeners = this.addListeners.bind(this);
     this.getUsers = this.getUsers.bind(this);
@@ -84,7 +86,7 @@ class App extends Component {
 
   componentDidMount() {
     // iOb0ZkKGaanR578aTpcE
-    this.loadTrackFromFirestore('RiRoVGa7FBpS4yDUQ3us');
+    this.loadTrackFromFirestore('p80i9rTbC0woeNkJfSMo');
     window.addEventListener('beforeunload', this.unsubscribe);
   }
 
@@ -165,19 +167,19 @@ class App extends Component {
     });
     this.pubnub.getMessage('tracks', (msg) => {
       const { message } = msg;
-      console.log(message);  
+      // console.log(message);  
     });
     this.pubnub.getStatus((st) => {
-      console.log(st);
+      // console.log(st);
     });
     this.pubnub.getPresence('tracks', (pres) => {
-      console.log(pres);
+      // console.log(pres);
     }); 
     this.pubnub.hereNow({
       channels: ['tracks'],
       includeState: true,
     }).then((response) => {
-      console.log(response);
+      // console.log(response);
       const { occupants } = response.channels.tracks;
       const users = [...this.state.users];
       occupants.forEach(item => {
@@ -198,14 +200,14 @@ class App extends Component {
         // console.log('got a message', message.data, ' from user ', message.userId);  
         // update if track is from different user
         if (message.userId !== this.state.userId) {
-          console.log('Updating track from user ', message.userId);      
+          // console.log('Updating track from user ', message.userId);      
           this.sequence = this.props.sequencer
             .update(this.sequence, message.data, this.beatNotifier, this.transportPositionNotifier, this.props.players);   
           this.setState({ tracks: message.data}); 
         }
       },
       presence: (pres) => {
-        console.log(pres);
+        // console.log(pres);
         let users = [...this.state.users];
         if (pres.action === 'join') {
           if (!users.includes(pres.uuid)) {
@@ -367,8 +369,8 @@ class App extends Component {
   }
 
   stopTransport() {
-    Tone.Transport.pause();
-    this.setState({ playing: false, record: false });
+    Tone.Transport.stop();
+    this.setState({ currentBeat: -1, playing: false, record: false });
     // this.updateTrackInFirestore();
   }
 
