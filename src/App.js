@@ -86,7 +86,7 @@ class App extends Component {
 
   componentDidMount() {
     // iOb0ZkKGaanR578aTpcE
-    this.loadTrackFromFirestore('p80i9rTbC0woeNkJfSMo');
+    this.loadTrackFromFirestore('iWBSW1VnshHeoKjMxfRz');
     window.addEventListener('beforeunload', this.unsubscribe);
   }
 
@@ -247,7 +247,7 @@ class App extends Component {
 
   getUsers() {
     const { users } = this.state;
-    console.log(users);
+    // console.log(users);
   }
 
   renderUsers() {
@@ -364,13 +364,13 @@ class App extends Component {
   }
 
   startTransport() {
-    Tone.Transport.start('+0.1');
+    Tone.Transport.start('+0.2');
     this.setState({ playing: true });
   }
 
   stopTransport() {
-    Tone.Transport.stop();
-    this.setState({ currentBeat: -1, playing: false, record: false });
+    Tone.Transport.pause();
+    this.setState({ playing: false, record: false });
     // this.updateTrackInFirestore();
   }
 

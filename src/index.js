@@ -43,4 +43,4 @@ const initProps = {
 };
 
 ReactDOM.render(<App {...initProps} />, document.getElementById('root'));
-// registerServiceWorker();
+registerServiceWorker();

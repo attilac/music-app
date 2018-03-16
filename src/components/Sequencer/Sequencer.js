@@ -65,7 +65,8 @@ class Sequencer extends Component {
 
   onResize = (width, height) => {
     // console.log(width, height);
-    this.setState({ width: Math.floor(width * 2), height: Math.floor(height * 2) });
+    // this.setState({ width: Math.floor(width * 2), height: Math.floor(height * 2) });
+    this.setState({ width: Math.floor(width), height: Math.floor(height) });
     this.drawBgGrid(this.props.bars);
     this.drawNotes(this.props.tracks, this.props.bars);
     this.updateTrackCanvas();
@@ -246,8 +247,10 @@ class Sequencer extends Component {
       y: e.clientY - offset.y
     };
     const steps = bars * 16;
-    const stepHeight = (this.bgCanvas.height / 2)  / tracks.length;   
-    const stepWidth = (this.bgCanvas.width / 2) / steps;
+    // const stepHeight = (this.bgCanvas.height / 2)  / tracks.length;   
+    // const stepWidth = (this.bgCanvas.width / 2) / steps;
+    const stepHeight = (this.bgCanvas.height)  / tracks.length;   
+    const stepWidth = (this.bgCanvas.width) / steps;    
     const track = Math.floor(mousePoint.y / stepHeight);
     const beat = Math.floor(mousePoint.x / stepWidth);
     /*
