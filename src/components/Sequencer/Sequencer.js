@@ -12,9 +12,13 @@ class Sequencer extends Component {
       width: 0,
       height: 0,
       notes: [],
-      scale: /*window.devicePixelRatio*/ 1,
+      scale: window.devicePixelRatio,
     };
     this.onResize = this.onResize.bind(this);
+    this.drawBgGrid = this.drawBgGrid.bind(this);
+    this.drawNotes = this.drawNotes.bind(this);
+    this.drawPlayhead = this.drawPlayhead.bind(this);
+    this.drawSelectedTrack = this.drawSelectedTrack.bind(this);
   }
 
   componentDidMount() {
@@ -129,7 +133,7 @@ class Sequencer extends Component {
       width: stepWidth, 
       height: this.playheadCanvas.height, 
       strokeStyle: 'rgba(255, 255, 255, .3)',
-    });  
+    });
   }
 
   updatePlayheadCanvas() {
@@ -267,10 +271,10 @@ class Sequencer extends Component {
   } 
 
   render() {
-    const { width, height } = this.state;
-    const displaySize = {width: width / 2, height: height / 2};
+    const { width, height, scale } = this.state;
+    const displaySize = {width: Math.round(width / scale), height: Math.round(height / scale)};
     return (
-      <div className="module module-sequencer w-100 text-center">
+      <div className="module module-sequencer text-center">
         <ReactResizeDetector handleWidth handleHeight onResize={this.onResize} />
         <div className="grid">
           <canvas
@@ -279,6 +283,7 @@ class Sequencer extends Component {
             width={width}
             height={height}
             onClick={this.handleCanvasClick}
+            style={displaySize}
           >
           </canvas>        
           <canvas 
@@ -286,6 +291,7 @@ class Sequencer extends Component {
             className="playhead-canvas" 
             width={width} 
             height={height}
+            style={displaySize}
           >  
           </canvas>
           <canvas 
@@ -293,6 +299,7 @@ class Sequencer extends Component {
             className="track-canvas" 
             width={width} 
             height={height}
+            style={displaySize}
           >
           </canvas>       
           <canvas 
@@ -300,6 +307,7 @@ class Sequencer extends Component {
             className="grid-canvas" 
             width={width}
             height={height}
+            style={displaySize}
           >
           </canvas>
         </div>     

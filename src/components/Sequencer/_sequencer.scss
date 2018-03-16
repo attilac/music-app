@@ -1,9 +1,15 @@
 .module-sequencer {
-  height: 80%;
+  width: 90%;
+  height: 60%;
+  @media (min-width: 992px) { 
+    width: 70%;
+    height: 60%;
+   }
   // background-color: darken(rgba(22, 28, 36, 1), 5%);
  .grid {
     width: 100%;
-    height: 100%;
+    height: 101%;
+    padding-bottom: 1;
     position: relative;
     border-top: solid 1px rgba(70, 70, 70, 1);
     border-bottom: solid 3px rgba(0, 0, 0, 1);
