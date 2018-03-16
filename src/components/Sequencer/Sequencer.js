@@ -12,6 +12,7 @@ class Sequencer extends Component {
       width: 0,
       height: 0,
       notes: [],
+      scale: /*window.devicePixelRatio*/ 1,
     };
     this.onResize = this.onResize.bind(this);
   }
@@ -65,10 +66,11 @@ class Sequencer extends Component {
 
   onResize = (width, height) => {
     // console.log(width, height);
-    // this.setState({ width: Math.floor(width * 2), height: Math.floor(height * 2) });
-    this.setState({ width: Math.floor(width), height: Math.floor(height) });
-    this.drawBgGrid(this.props.bars);
-    this.drawNotes(this.props.tracks, this.props.bars);
+    const { scale } = this.state;
+    const { bars, tracks } = this.props;
+    this.setState({ width: Math.floor(width * scale), height: Math.floor(height * scale) });
+    this.drawBgGrid(bars);
+    this.drawNotes(tracks, bars);
     this.updateTrackCanvas();
   }
 
@@ -146,7 +148,7 @@ class Sequencer extends Component {
     const steps = bars * 16;
 		const gridWidth = this.bgCanvas.width;
     const gridHeight = this.bgCanvas.height;
-    const stepHeight = gridHeight / this.props.tracks.length;   
+    const stepHeight = gridHeight / tracks.length;   
     const stepWidth = gridWidth / steps;
     this.bgContext.lineWidth = 1;
 
@@ -196,7 +198,7 @@ class Sequencer extends Component {
   drawNotes(tracks, bars) {
     // console.log(bars);
     const steps = bars * 16;
-    const tileMargin = 4.5;
+    const tileMargin = 2.5;
 		const gridWidth = this.noteCanvas.width;
     const gridHeight = this.noteCanvas.height;
     const stepHeight = gridHeight / tracks.length;   
@@ -239,7 +241,7 @@ class Sequencer extends Component {
   }
 
   handleCanvasClick = (e) => {
-    const { bars, notes } = this.state;
+    const { bars, notes, scale } = this.state;
     const { toggleSequenceBeat, tracks, players } = this.props;
     const offset = e.target.getBoundingClientRect();
     const mousePoint = {
@@ -247,10 +249,8 @@ class Sequencer extends Component {
       y: e.clientY - offset.y
     };
     const steps = bars * 16;
-    // const stepHeight = (this.bgCanvas.height / 2)  / tracks.length;   
-    // const stepWidth = (this.bgCanvas.width / 2) / steps;
-    const stepHeight = (this.bgCanvas.height)  / tracks.length;   
-    const stepWidth = (this.bgCanvas.width) / steps;    
+    const stepHeight = (this.bgCanvas.height / scale)  / tracks.length;   
+    const stepWidth = (this.bgCanvas.width / scale) / steps;
     const track = Math.floor(mousePoint.y / stepHeight);
     const beat = Math.floor(mousePoint.x / stepWidth);
     /*
@@ -268,6 +268,7 @@ class Sequencer extends Component {
 
   render() {
     const { width, height } = this.state;
+    const displaySize = {width: width / 2, height: height / 2};
     return (
       <div className="module module-sequencer w-100 text-center">
         <ReactResizeDetector handleWidth handleHeight onResize={this.onResize} />
@@ -291,14 +292,14 @@ class Sequencer extends Component {
             ref="trackCanvas"
             className="track-canvas" 
             width={width} 
-            height={height} 
+            height={height}
           >
           </canvas>       
           <canvas 
             ref="bgCanvas"
             className="grid-canvas" 
-            width={width} 
-            height={height} 
+            width={width}
+            height={height}
           >
           </canvas>
         </div>     
